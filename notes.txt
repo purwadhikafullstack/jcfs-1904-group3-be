@@ -1,0 +1,48 @@
+const response = [
+  { name: "Poang", category: "Chair", variant: "Black" },
+  { name: "Poang", category: "Chair", variant: "Yellow" },
+  { name: "Poang", category: "Chair", variant: "White" },
+];
+
+const mappedResponse = [
+  {
+    name: "Poang",
+    category: "Chair",
+    variants: ["Black", "Yellow", "White"],
+  },
+];
+
+// PATTERN 2
+
+const result = [
+  { name: "Poang", category: "Chair", variant: "Black" },
+  { name: "Poang", category: "Chair", variant: "Yellow" },
+  { name: "Poang", category: "Chair", variant: "White" },
+  { name: "Poang", category: "Office", variant: "Yellow" },
+  { name: "Poang", category: "Office", variant: "White" },
+];
+
+const mappedResult = [
+  {
+    name: "Poang",
+    categories: [
+      {
+        name: "Chair",
+        variants: [{ name: "Black", image: "http" }, "Yellow", "White"],
+      },
+      { 
+        name: "Office", 
+        variants: ["Yellow", "White"] },
+      ],
+  },
+];
+
+
+const mappedResult = [
+  {
+    name: "Poang",
+    variant: "Black"
+    categories: ["chair","home","armed chair"],
+  },
+];
+
