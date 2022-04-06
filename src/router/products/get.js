@@ -199,7 +199,7 @@ const getVariantsProducts = router.get("/productDetail", async (req, res) => {
 const getProductsCategory = router.get("/category", async (req, res) => {
   try {
     const connection = await pool.promise().getConnection();
-    const sqlGetProductCategory = ` SELECT p.id As productId , c.categoryName FROM products as p
+    const sqlGetProductCategory = ` SELECT p.id As productId , c.id As categoryId , c.categoryName FROM products as p
     JOIN categories_products as c_p ON c_p.productId = p.id 
     JOIN categories as c ON c.id = c_p.categoryId WHERE p.id = ?;`;
     const { id } = req.query;

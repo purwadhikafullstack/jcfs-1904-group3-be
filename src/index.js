@@ -15,6 +15,7 @@ app.get("/", (req, res) => {
 
 app.use("/products", productsRouter);
 app.use("/categories", categoryRouter);
+
 app.use((error, req, res, next) => {
   res.status(500).send({
     status: "ERROR",
