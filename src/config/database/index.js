@@ -11,7 +11,7 @@ const pool = mysql2.createPool({
   connectionLimit: 50,
 });
 
-mysql2.getConnection((err, conn) => {
+pool.getConnection((err, conn) => {
   if (err) {
     conn.release();
     console.error("error connecting: " + err.stack);
