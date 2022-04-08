@@ -1,8 +1,11 @@
+require("dotenv").config();
 const express = require("express");
 const app = express();
-const port = 2022;
+const port = process.env.API_PORT;
 const cors = require("cors");
-const pool = require("../src/config/database");
+
+const productsRouter = require("./router/products");
+const categoryRouter = require("./router/category");
 
 app.use(cors());
 app.use(express.json());
@@ -10,6 +13,9 @@ app.use(express.json());
 app.get("/", (req, res) => {
   res.status(200).send("API IS RUNNING");
 });
+
+app.use("/products", productsRouter);
+app.use("/categories", categoryRouter);
 
 app.use((error, req, res, next) => {
   res.status(500).send({
