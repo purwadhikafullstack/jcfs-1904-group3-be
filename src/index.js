@@ -27,5 +27,5 @@ app.use((error, req, res, next) => {
 
 app.listen(port, (err) => {
   if (err) return console.log({ err });
-  console.log(`Api is running at server ${port}`);
+  console.log(`3_Warehouse is running at ${port}`);
 });
