@@ -5,22 +5,6 @@ const { uploadProducts } = require("../services/multer");
 
 const uploadProductImage = uploadProducts.single("image");
 
-const postProduct = router.post("/category", async (req, res) => {
-  try {
-    const connection = await pool.promise().getConnection();
-    const { productName } = req.body;
-
-    const sqlPostProductCategory = `INSERT INTO categories_products (productId,categoryId) values(?,?);`;
-    const data = [productId, categoryId];
-    const [result] = await connection.query(sqlPostProductCategory, data);
-    connection.release();
-
-    res.status(200).send({ message: "Data telah berhasil di tambahkan" });
-  } catch (error) {
-    console.log(error);
-  }
-});
-
 const postProductCategory = router.post("/category", async (req, res) => {
   try {
     const connection = await pool.promise().getConnection();
@@ -37,18 +21,64 @@ const postProductCategory = router.post("/category", async (req, res) => {
   }
 });
 
-const postImageProduct = router.post(
-  "/upload",
+const postProductVariant = router.post("/variant", async (req, res) => {
+  try {
+    const connection = await pool.promise().getConnection();
+
+    const { quantity, productId, color, price, warehouseId } = req.body;
+
+    if (!req.body.size) {
+      delete req.body.size;
+    }
+
+    delete req.body.quantity;
+    delete req.body.productId;
+
+    req.body.warehouseId = parseInt(req.body.warehouseId);
+
+    const qtyTotal = quantity;
+    const qtyAvailable = quantity;
+
+    const sqlPostProductVariant = `INSERT INTO variant
+    (color, price, warehouseId, qtyTotal, qtyAvailable, productId) values(?,?,?,?,?,?);`;
+    const data = [color, price, warehouseId, qtyTotal, qtyAvailable, productId];
+
+    const [resultPost] = await connection.query(sqlPostProductVariant, data);
+
+    const sqlGetVariantsId = `SELECT id FROM variant ORDER BY id DESC LIMIT 1`;
+
+    const [resultGet] = await connection.query(sqlGetVariantsId);
+
+    res
+      .status(200)
+      .send({ message: "Data telah berhasil di tambahkan", resultGet });
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+const postVariantImage = router.post(
+  "/variant/image",
   uploadProductImage,
   async (req, res) => {
     try {
-      const sqlPostImageProduct = `UPDATE products as p
-      join variant as v on v.productId = p.id
-      SET ? Where productId = ? and v.id = ?;`;
+      const connection = await pool.promise().getConnection();
+
+      const { id } = req.body;
+
+      const sqlPutUserPhoto = `UPDATE variant SET ? WHERE id = ?`;
+      const dataPutUserPhoto = [{ image: req.file.filename }, id];
+
+      const [result] = await connection.query(
+        sqlPutUserPhoto,
+        dataPutUserPhoto
+      );
+
+      res.status(200).send({ message: "Data telah berhasil di tambahkan" });
     } catch (error) {
       console.log(error);
     }
   }
 );
 
-module.exports = { postProductCategory };
+module.exports = { postProductCategory, postVariantImage, postProductVariant };
