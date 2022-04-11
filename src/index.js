@@ -1,12 +1,15 @@
 const express = require("express");
+const path = require("path");
 const app = express();
 const port = 2023;
 const cors = require("cors");
+const appRootDir = require("app-root-dir").get();
 
 const productsRouter = require("./router/products");
 const categoryRouter = require("./router/category");
 
 app.use(cors());
+app.use(express.static("public"));
 app.use(express.json());
 
 app.get("/", (req, res) => {

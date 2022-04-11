@@ -84,9 +84,10 @@ const postVariantImage = router.post(
       const connection = await pool.promise().getConnection();
 
       const { id } = req.body;
+      const image = `http://localhost:2023/images/products/${req.file.filename}`;
 
       const sqlPutUserPhoto = `UPDATE variant SET ? WHERE id = ?`;
-      const dataPutUserPhoto = [{ image: req.file.filename }, id];
+      const dataPutUserPhoto = [{ image: image }, id];
 
       const [result] = await connection.query(
         sqlPutUserPhoto,

@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const pool = require("../../config/database");
 
-const getProductsByCategory = async (keyWord, limit, offset) => {
+const getProductsByCategory = async (keyWord, limit, offset, order, sortBy) => {
   try {
     const connection = await pool.promise().getConnection();
     const sqlGetTotalData = `SELECT count(distinct p.id) as total FROM products as p
@@ -12,7 +12,7 @@ const getProductsByCategory = async (keyWord, limit, offset) => {
     JOIN categories as c ON c.id = c_p.categoryId 
     WHERE c.categoryName LIKE ?
     ORDER by p.id);`;
-    const getProductsByCategory = `SELECT p.id AS productId,
+    var getProductsByCategory = `SELECT p.id AS productId,
     p.productName,
     v.warehouseId,
     v.id As variantId,
@@ -28,10 +28,14 @@ const getProductsByCategory = async (keyWord, limit, offset) => {
     JOIN categories as c ON c.id = c_p.categoryId 
     WHERE c.categoryName LIKE ?
     ORDER by p.id)
-    GROUP BY p.id
-    LIMIT ? OFFSET ? ;`;
+    GROUP BY p.id `;
+    if (sortBy && order) {
+      getProductsByCategory += `ORDER BY ${sortBy} ${order} LIMIT ${limit} OFFSET ${offset};`;
+    } else {
+      getProductsByCategory += `LIMIT ${limit} OFFSET ${offset};`;
+    }
 
-    const data = [keyWord, limit, offset];
+    const data = keyWord;
     const [dataCount] = await connection.query(sqlGetTotalData, keyWord);
     const [result] = await connection.query(getProductsByCategory, data);
     return { dataCount, result };
@@ -44,7 +48,7 @@ const getProducts = router.get("/", async (req, res) => {
   try {
     const connection = await pool.promise().getConnection();
 
-    const { page, itemsPerPage } = req.query;
+    const { page, itemsPerPage, order, sortBy } = req.query;
     const limit = parseInt(itemsPerPage);
     const offset = parseInt((page - 1) * itemsPerPage);
 
@@ -60,7 +64,9 @@ const getProducts = router.get("/", async (req, res) => {
         const { result, dataCount } = await getProductsByCategory(
           keyWord,
           limit,
-          offset
+          offset,
+          order,
+          sortBy
         );
 
         connection.release();
@@ -82,10 +88,15 @@ const getProducts = router.get("/", async (req, res) => {
         v.qtyTotal FROM products as p
         JOIN variant as v ON v.productId = p.id
         Where p.productName Like ? or v.color Like ? or v.size Like ?
-        GROUP BY p.id
-        LIMIT ? OFFSET ?;`;
+        GROUP BY p.id `;
+
+        if (sortBy && order) {
+          getProductByKeyword += `ORDER BY ${sortBy} ${order} LIMIT ${limit} OFFSET ${offset};`;
+        } else {
+          getProductByKeyword += `LIMIT ${limit} OFFSET ${offset};`;
+        }
         const searchKeyword = [keyWord, keyWord, keyWord];
-        const data = [keyWord, keyWord, keyWord, limit, offset];
+        const data = [keyWord, keyWord, keyWord];
         const [dataCount] = await connection.query(
           sqlGetTotalData,
           searchKeyword
@@ -102,10 +113,13 @@ const getProducts = router.get("/", async (req, res) => {
     }
     if (req.query.category) {
       const keyWord = req.query.category;
+
       const { result, dataCount } = await getProductsByCategory(
         keyWord,
         limit,
-        offset
+        offset,
+        order,
+        sortBy
       );
 
       connection.release();
@@ -113,7 +127,7 @@ const getProducts = router.get("/", async (req, res) => {
     } else {
       const sqlGetTotalData = `SELECT count(distinct p.id) as total FROM products as p
       JOIN variant as v ON v.productId = p.id;`;
-      const sqlGetProductList = `SELECT p.id AS productId,
+      var sqlGetProductList = `SELECT p.id AS productId,
       p.productName,
       v.warehouseId,
       v.id As variantId,
@@ -124,11 +138,14 @@ const getProducts = router.get("/", async (req, res) => {
       v.qtyAvailable,
       v.qtyTotal FROM products as p
       JOIN variant as v ON v.productId = p.id
-      GROUP BY p.id
-      LIMIT ? OFFSET ?;`;
-      const data = [limit, offset];
+      GROUP BY p.id `;
+      if (sortBy && order) {
+        sqlGetProductList += `ORDER BY ${sortBy} ${order} LIMIT ${limit} OFFSET ${offset};`;
+      } else {
+        sqlGetProductList += `LIMIT ${limit} OFFSET ${offset};`;
+      }
       const [dataCount] = await connection.query(sqlGetTotalData);
-      const [result] = await connection.query(sqlGetProductList, data);
+      const [result] = await connection.query(sqlGetProductList);
       connection.release();
 
       res.status(200).send({ result, dataCount });

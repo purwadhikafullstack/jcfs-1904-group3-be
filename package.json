@@ -18,6 +18,7 @@
   },
   "homepage": "https://github.com/purwadhikafullstack/jcfs-1904-group1-be#readme",
   "dependencies": {
+    "app-root-dir": "^1.0.2",
     "bcrypt": "^5.0.1",
     "cors": "^2.8.5",
     "dotenv": "^16.0.0",

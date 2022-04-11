@@ -11,7 +11,10 @@ const storageProducts = multer.diskStorage({
     cb(null, photoDirectoryProducts);
   },
   filename: function (req, file, cb) {
-    cb(null, `test-photo.png`);
+    file.originalname;
+    const ext = file.mimetype.split("/")[1];
+
+    cb(null, `${file.originalname}-${Date.now()}.${ext}`);
   },
 });
 
