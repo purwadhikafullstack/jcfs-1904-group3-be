@@ -9,6 +9,7 @@ const {
   postProductCategory,
   postVariantImage,
   postProductVariant,
+  postProduct,
 } = require("./post");
 const { deleteProductCategoryRouter } = require("./delete");
 const { putProductRouter } = require("./put");
@@ -20,6 +21,7 @@ router.use(getProductsCategory);
 router.use(postProductCategory);
 router.use(postVariantImage);
 router.use(postProductVariant);
+router.use(postProduct);
 
 router.use(deleteProductCategoryRouter);
 

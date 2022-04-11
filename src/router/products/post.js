@@ -2,8 +2,27 @@ const express = require("express");
 const router = express.Router();
 const pool = require("../../config/database");
 const { uploadProducts } = require("../services/multer");
+const { getProducts } = require("./get");
 
 const uploadProductImage = uploadProducts.single("image");
+
+const postProduct = router.post("/", async (req, res) => {
+  try {
+    const connection = await pool.promise().getConnection();
+    const { productName } = req.body;
+    const sqlPostProduct = `INSERT INTO products SET productName = ?`;
+
+    const [result] = await connection.query(sqlPostProduct, productName);
+    connection.release();
+
+    const sqlGetNewProduct = `SELECT id FROM products ORDER BY id DESC LIMIT 1`;
+    const [getProduct] = await connection.query(sqlGetNewProduct);
+
+    res.status(200).send(getProduct[0]);
+  } catch (error) {
+    console.log(error);
+  }
+});
 
 const postProductCategory = router.post("/category", async (req, res) => {
   try {
@@ -81,4 +100,9 @@ const postVariantImage = router.post(
   }
 );
 
-module.exports = { postProductCategory, postVariantImage, postProductVariant };
+module.exports = {
+  postProductCategory,
+  postVariantImage,
+  postProductVariant,
+  postProduct,
+};
