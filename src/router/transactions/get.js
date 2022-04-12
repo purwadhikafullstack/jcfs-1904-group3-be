@@ -6,8 +6,9 @@ const getTransactionSumPerMonth = router.get(
   async (req, res) => {
     try {
       const connection = await pool.promise().getConnection();
-      const sqlgetTransactionSumPerMonth = `SELECT created_at as Date , sum(totalAmount) as totalAmount 
-      FROM transactions GROUP BY MONTH(created_at);`;
+      const sqlgetTransactionSumPerMonth = `select created_at as Date , sum(totalAmount) as totalAmount from transactions 
+      WHERE YEAR(created_at)=YEAR(curdate()) group by MONTH(created_at);
+      `;
       const [result] = await connection.query(sqlgetTransactionSumPerMonth);
       connection.release();
 
