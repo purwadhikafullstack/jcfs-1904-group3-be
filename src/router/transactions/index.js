@@ -1,7 +1,8 @@
 const router = require("express").Router();
 
-const { getTransactionSumPerMonth } = require("./get");
+const { getTransactionTotalRevenue, getProductTotalRevenue } = require("./get");
 
-router.use(getTransactionSumPerMonth);
+router.use(getTransactionTotalRevenue);
+router.use(getProductTotalRevenue);
 
 module.exports = router;

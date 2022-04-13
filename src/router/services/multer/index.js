@@ -12,9 +12,10 @@ const storageProducts = multer.diskStorage({
   },
   filename: function (req, file, cb) {
     file.originalname;
+    const split = file.originalname.split(".")[0];
     const ext = file.mimetype.split("/")[1];
 
-    cb(null, `${file.originalname}-${Date.now()}.${ext}`);
+    cb(null, `${split}-${Date.now()}.${ext}`);
   },
 });
 

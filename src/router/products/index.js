@@ -1,9 +1,10 @@
 const router = require("express").Router();
 
 const {
-  getProducts,
+  getFilteredProduct,
   getVariantsProducts,
   getProductsCategory,
+  getProducts,
 } = require("./get");
 const {
   postProductCategory,
@@ -14,7 +15,7 @@ const {
 const { deleteProductCategoryRouter } = require("./delete");
 const { putProductRouter } = require("./put");
 
-router.use(getProducts);
+router.use(getFilteredProduct);
 router.use(getVariantsProducts);
 router.use(getProductsCategory);
 
