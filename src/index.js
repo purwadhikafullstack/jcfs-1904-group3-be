@@ -1,7 +1,8 @@
+require("dotenv").config();
 const express = require("express");
 const path = require("path");
 const app = express();
-const port = 2023;
+const port = process.env.API_PORT;
 const cors = require("cors");
 const appRootDir = require("app-root-dir").get();
 
