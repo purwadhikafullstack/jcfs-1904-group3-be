@@ -9,6 +9,7 @@ const appRootDir = require("app-root-dir").get();
 const productsRouter = require("./router/products");
 const categoryRouter = require("./router/category");
 const transactionsRouter = require("./router/transactions");
+const cartsRouter = require("./router/carts");
 
 app.use(cors());
 app.use(express.static("public"));
@@ -21,6 +22,7 @@ app.get("/", (req, res) => {
 app.use("/products", productsRouter);
 app.use("/categories", categoryRouter);
 app.use("/transactions", transactionsRouter);
+app.use("/carts", cartsRouter);
 
 app.use((error, req, res, next) => {
   res.status(500).send({
