@@ -3,6 +3,23 @@ const req = require("express/lib/request");
 const router = express.Router();
 const pool = require("../../config/database");
 
+const deleteProduct = router.delete("/", async (req, res) => {
+  try {
+    const { productId } = req.body;
+
+    const connection = await pool.promise().getConnection();
+    const sqlDeleteProduct = `update products set isDelete = 1 where id = ? ;`;
+
+    const [result] = await connection.query(sqlDeleteProduct, productId);
+
+    connection.release();
+
+    res.status(200).send({ message: "data berhasil di hapus" });
+  } catch (error) {
+    console.log(error);
+  }
+});
+
 const deleteProductCategoryRouter = router.delete(
   "/category",
   async (req, res) => {
@@ -24,4 +41,4 @@ const deleteProductCategoryRouter = router.delete(
   }
 );
 
-module.exports = { deleteProductCategoryRouter };
+module.exports = { deleteProductCategoryRouter, deleteProduct };

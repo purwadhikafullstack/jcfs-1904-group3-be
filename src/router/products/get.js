@@ -2,6 +2,98 @@ const express = require("express");
 const router = express.Router();
 const pool = require("../../config/database");
 
+const getProducts = router.get("/", async (req, res) => {
+  try {
+    const connection = await pool.promise().getConnection();
+    const sqlGetProducts = `select id as productId, productName from products;`;
+
+    const [result] = await connection.query(sqlGetProducts);
+    connection.release();
+
+    res.status(200).send({ result });
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+const getCartsProductVariant = router.get("/cart", async (req, res) => {
+  try {
+    const connection = await pool.promise().getConnection();
+    const { result } = req.query;
+
+    // converting carts query to object
+    var carts = result.map((value) => {
+      return JSON.parse(value);
+    });
+
+    // data to input in where clause query
+    const productId = [];
+    const variantId = [];
+    carts.filter((value) => {
+      productId.push(value.productId);
+      variantId.push(value.variantId);
+    });
+
+    const sqlGetProducts = `SELECT p.id AS productId,
+    p.productName,
+    v.warehouseId,
+    v.id As variantId,
+    v.color as variant,
+    v.size,
+    v.price,
+    v.image,
+    v.qtyAvailable,
+    v.qtyTotal FROM products as p
+    JOIN variant as v ON v.productId = p.id
+    where  p.id in(?) and v.id in(?)`;
+
+    const data = [productId, variantId];
+
+    const [products] = await connection.query(sqlGetProducts, data);
+
+    // filtering product and variant
+    // checking which product and variant have the same product id and variant id to the carts
+    // if the id is the same it will add the variant and the product to cart
+    products.filter((products) => {
+      const {
+        productName,
+        warehouseId,
+        variant,
+        size,
+        price,
+        image,
+        qtyAvailable,
+        qtyTotal,
+      } = products;
+
+      carts.filter((value, index) => {
+        if (value.productId === products.productId) {
+          if (value.variantId === products.variantId) {
+            carts[index] = {
+              ...carts[index],
+              productName,
+              warehouseId,
+              variant,
+              size,
+              price,
+              image,
+              qtyAvailable,
+              qtyTotal,
+              total: value.productQuantity * products.price,
+            };
+          }
+        }
+      });
+    });
+
+    connection.release();
+
+    res.status(200).send({ carts });
+  } catch (error) {
+    console.log(error);
+  }
+});
+
 const getProductsByCategory = async (keyWord, limit, offset, order, sortBy) => {
   try {
     const connection = await pool.promise().getConnection();
@@ -229,23 +321,10 @@ const getProductsCategory = router.get("/category", async (req, res) => {
   }
 });
 
-const getProducts = router.get("/", async (req, res) => {
-  try {
-    const connection = await pool.promise().getConnection();
-    const sqlGetProducts = `select id as productId, productName from products;`;
-
-    const [result] = await connection.query(sqlGetProducts);
-    connection.release();
-
-    res.status(200).send({ result });
-  } catch (error) {
-    console.log(error);
-  }
-});
-
 module.exports = {
   getFilteredProduct,
   getVariantsProducts,
   getProductsCategory,
   getProducts,
+  getCartsProductVariant,
 };
