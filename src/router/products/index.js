@@ -31,4 +31,6 @@ router.use(deleteProduct);
 
 router.use(putProductRouter);
 
+router.use(putProductRouter);
+
 module.exports = router;
