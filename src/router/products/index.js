@@ -5,6 +5,7 @@ const {
   getVariantsProducts,
   getProductsCategory,
   getProducts,
+  getCartsProductVariant,
 } = require("./get");
 const {
   postProductCategory,
@@ -18,6 +19,7 @@ const { putProductRouter } = require("./put");
 router.use(getFilteredProduct);
 router.use(getVariantsProducts);
 router.use(getProductsCategory);
+router.use(getCartsProductVariant);
 
 router.use(postProductCategory);
 router.use(postVariantImage);
