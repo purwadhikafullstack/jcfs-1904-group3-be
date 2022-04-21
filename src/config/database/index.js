@@ -20,5 +20,4 @@ pool.getConnection((err, conn) => {
   console.log(`Successfully connected to the database (id ${conn.threadId})`);
   conn.release();
 });
-
 module.exports = pool;
