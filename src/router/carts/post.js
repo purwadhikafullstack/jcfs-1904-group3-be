@@ -6,16 +6,18 @@ const postCart = router.post("/", async (req, res) => {
     const connection = await pool.promise().getConnection();
     const { userId, productId, productQuantity, variantId } = req.body;
 
-    const sqlCheckCart = `SELECT * from carts where productId = ? and userId = ? and variantId = ?; `;
+    const sqlCheckCart = `SELECT * from carts where productId = ? and userId = ? and variantId = ? and isDelete is NULL; `;
 
     const dataSqlCheckCart = [productId, userId, variantId];
     const [check] = await connection.query(sqlCheckCart, dataSqlCheckCart);
+
     if (check.length) {
+      console.log("item masih ada di cart");
       const cartId = check[0].id;
       const updateQuantity = check[0].productQuantity + 1;
 
       const sqlPutCartQuantity = `UPDATE carts 
-      SET productQuantity = ? Where id = ?;`;
+          SET productQuantity = ? Where id = ?;`;
       const dataSqlPutCartQuantity = [updateQuantity, cartId];
 
       const [result] = await connection.query(
@@ -24,12 +26,16 @@ const postCart = router.post("/", async (req, res) => {
       );
       connection.release();
       res.status(200).send({ message: "item succesfuly added to cart" });
-    }
-
-    if (!check.length) {
+    } else {
+      console.log("item gaada di cart");
       const sqlpostCart = `INSERT INTO carts SET ?`;
 
-      const dataSqlPostCart = { userId, productId, productQuantity, variantId };
+      const dataSqlPostCart = {
+        userId,
+        productId,
+        productQuantity,
+        variantId,
+      };
 
       const [result] = await connection.query(sqlpostCart, dataSqlPostCart);
       connection.release();

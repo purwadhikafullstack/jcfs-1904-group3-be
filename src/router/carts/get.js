@@ -6,7 +6,7 @@ const getCarts = router.get("/", async (req, res) => {
     const connection = await pool.promise().getConnection();
 
     const { userId } = req.query;
-    const sqlpostCart = `SELECT  id as cartId,userId,productId,variantId,productQuantity  FROM carts where userId = ?`;
+    const sqlpostCart = `SELECT  id as cartId,userId,productId,variantId,productQuantity FROM carts where userId = ? and isDelete is NULL;`;
 
     const [result] = await connection.query(sqlpostCart, userId);
     connection.release();

@@ -4,11 +4,12 @@ const pool = require("../../config/database");
 
 const putCartQuantity = router.put("/", async (req, res) => {
   try {
+    console.log("Berhasil di update");
     const { cartId, productQuantity } = req.body;
 
     const connection = await pool.promise().getConnection();
     const sqlPutCartQuantity = `UPDATE carts 
-    SET productQuantity = ? Where id = ?;`;
+    SET productQuantity = ?  Where id = ?;`;
 
     const data = [productQuantity, cartId];
     const [result] = await connection.query(sqlPutCartQuantity, data);
