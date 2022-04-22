@@ -5,7 +5,6 @@ const pool = require("../../config/database");
 
 const deleteCarts = router.delete("/", async (req, res) => {
   try {
-    console.log("berhasil di delete");
     const { cartId } = req.body;
 
     const connection = await pool.promise().getConnection();
@@ -20,4 +19,28 @@ const deleteCarts = router.delete("/", async (req, res) => {
     console.log(error);
   }
 });
-module.exports = { deleteCarts };
+
+const deleteCartWhenCheckout = router.delete("/checkout", async (req, res) => {
+  try {
+    // delete cart when the item successfuly checkout
+    // idCarts is an array of object consisting the cart that recently just got checkout
+    const { idCarts } = req.body;
+
+    const connection = await pool.promise().getConnection();
+
+    const sqlDeleteCartWhenCheckout = `update carts set isDelete = 1,productQuantity = 0 where id in(?)`;
+    const dataDeleteCartWhenCheckout = [idCarts];
+
+    const [result] = await connection.query(
+      sqlDeleteCartWhenCheckout,
+      dataDeleteCartWhenCheckout
+    );
+
+    connection.release();
+
+    res.status(200).send({ message: "data berhasil di hapus" });
+  } catch (error) {
+    console.log(error);
+  }
+});
+module.exports = { deleteCarts, deleteCartWhenCheckout };

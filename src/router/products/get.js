@@ -29,6 +29,7 @@ const getCartsProductVariant = router.get("/cart", async (req, res) => {
     // data to input in where clause query
     const productId = [];
     const variantId = [];
+
     carts.filter((value) => {
       productId.push(value.productId);
       variantId.push(value.variantId);
