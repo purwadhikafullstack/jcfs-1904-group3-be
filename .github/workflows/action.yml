@@ -16,9 +16,9 @@ jobs:
       - name: Deploy 3_warehouse API with github action
         uses: appleboy/ssh-action@master
         with:
-          host: ${{secrets.SSH_HOST}}
-          username: ${{secrets.SSH_USERNAME}}
-          password: ${{secrets.SSH_PASSWORD}}
+          host: 172.105.115.129
+          username: "root"
+          password: "PurwadhikaJCWD;"
           port: 22
           script: |
             cd ~/app/jcfs-1904-group3-be
