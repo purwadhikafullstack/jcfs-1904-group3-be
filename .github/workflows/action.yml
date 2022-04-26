@@ -24,4 +24,4 @@ jobs:
             cd ~/app/3-warehouse-api
             git pull origin master
             npm install
-            pm2 restart api-3-warehouse
+            pm2 restart 3-warehouse
