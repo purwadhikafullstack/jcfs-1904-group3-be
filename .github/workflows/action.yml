@@ -21,7 +21,7 @@ jobs:
           password: "PurwadhikaJCWD;"
           port: 22
           script: |
-            cd ~/app/jcfs-1904-group3-be
+            cd ~/app/3-warehouse-api
             git pull origin master
             npm install
             pm2 restart api-3-warehouse
