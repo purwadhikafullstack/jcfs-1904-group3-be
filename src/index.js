@@ -1,13 +1,17 @@
 require("dotenv").config();
 const express = require("express");
+const path = require("path");
 const app = express();
 const port = process.env.API_PORT;
 const cors = require("cors");
+const appRootDir = require("app-root-dir").get();
 
 const productsRouter = require("./router/products");
 const categoryRouter = require("./router/category");
+const transactionsRouter = require("./router/transactions");
 
 app.use(cors());
+app.use(express.static("public"));
 app.use(express.json());
 
 app.get("/", (req, res) => {
@@ -16,6 +20,7 @@ app.get("/", (req, res) => {
 
 app.use("/products", productsRouter);
 app.use("/categories", categoryRouter);
+app.use("/transactions", transactionsRouter);
 
 app.use((error, req, res, next) => {
   res.status(500).send({
