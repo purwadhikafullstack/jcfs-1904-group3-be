@@ -2,15 +2,20 @@ const express = require("express");
 const router = express.Router();
 const pool = require("../../config/database");
 
+const { uploadPaymentEvidence } = require("../services/multer");
+
+const multerUploadPaymentEvidence = uploadPaymentEvidence.single("image");
+
 const postWaitingPaymentTransaction = router.post(
   "/waiting-payment",
   async (req, res) => {
     try {
       const connection = await pool.promise().getConnection();
-      const { totalAmount, userId } = req.body;
-      const sqlPostWaitingPaymentTransaction = `INSERT INTO transactions (userId,totalAmount,status) values(?,?,?);`;
+      const { totalAmount, userId, addressId } = req.body;
+      const sqlPostWaitingPaymentTransaction = `INSERT INTO transactions (userId,addressId,totalAmount,status) values(?,?,?,?);`;
       const dataWaitingPaymentTransaction = [
         userId,
+        addressId,
         totalAmount,
         "waiting payment",
       ];
@@ -61,5 +66,36 @@ const postDetailTransaction = router.post("/detail", async (req, res) => {
     console.log(error);
   }
 });
+const postPaymentEvidence = router.post(
+  "/evidence/payment",
+  multerUploadPaymentEvidence,
+  async (req, res) => {
+    try {
+      const connection = await pool.promise().getConnection();
 
-module.exports = { postWaitingPaymentTransaction, postDetailTransaction };
+      const { transactionId } = req.body;
+      const image = `http://localhost:2023/images/payment/${req.file.filename}`;
+
+      const sqlPutUserPhoto = `UPDATE transactions SET ? WHERE id = ?`;
+      const dataPutUserPhoto = [
+        { paymentEvidence: image, status: "waiting confirmation" },
+        parseInt(transactionId),
+      ];
+
+      const [result] = await connection.query(
+        sqlPutUserPhoto,
+        dataPutUserPhoto
+      );
+
+      res.status(200).send({ message: "Data telah berhasil di tambahkan" });
+    } catch (error) {
+      console.log(error);
+    }
+  }
+);
+
+module.exports = {
+  postWaitingPaymentTransaction,
+  postDetailTransaction,
+  postPaymentEvidence,
+};

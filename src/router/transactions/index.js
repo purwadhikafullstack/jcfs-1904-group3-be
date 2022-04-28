@@ -1,6 +1,10 @@
 const router = require("express").Router();
 
-const { getTransactionTotalRevenue, getProductTotalRevenue } = require("./get");
+const {
+  getTransactionTotalRevenue,
+  getProductTotalRevenue,
+  getTransactionHistory,
+} = require("./get");
 const {
   postWaitingPaymentTransaction,
   postDetailTransaction,
@@ -8,6 +12,7 @@ const {
 
 router.use(getTransactionTotalRevenue);
 router.use(getProductTotalRevenue);
+router.use(getTransactionHistory);
 
 router.use(postWaitingPaymentTransaction);
 router.use(postDetailTransaction);

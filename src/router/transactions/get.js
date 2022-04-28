@@ -58,4 +58,46 @@ const getProductTotalRevenue = router.get(
   }
 );
 
-module.exports = { getTransactionTotalRevenue, getProductTotalRevenue };
+const getTransactionHistory = router.get("/history", async (req, res) => {
+  try {
+    const connection = await pool.promise().getConnection();
+    const { userId } = req.query;
+
+    const sqlGetTransactionsWithAddress = `select t.id as transactionId, userId,totalAmount,paymentEvidence,status,
+    addressId,province,city,district,urban_village,postal_code,detail_address,t.created_at,
+    t.updated_at from transactions as t JOIN address as a on a.id = t.addressId where userId = ? and status = "waiting payment";
+    `;
+
+    const [resultTransactionWithAddress] = await connection.query(
+      sqlGetTransactionsWithAddress,
+      userId
+    );
+    // This will return a list of transactionId that can be used to get detailTransaction data
+    // [31,32]
+    const arrayListOfTransactionId = [];
+    resultTransactionWithAddress.filter((value) => {
+      arrayListOfTransactionId.push(value.transactionId);
+    });
+
+    const sqlGetDetailTransactions = `select id as detailTransactionId,transactionId, productName,productPrice,productColor,productSize,quantity,productImage from detailtransactions where transactionId IN(?);
+    `;
+    const dataGetDetailTransactions = [arrayListOfTransactionId];
+    const [resultDetailTransactions] = await connection.query(
+      sqlGetDetailTransactions,
+      dataGetDetailTransactions
+    );
+
+    res.status(200).send({
+      resultTransactionWithAddress,
+      resultDetailTransactions,
+    });
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+module.exports = {
+  getTransactionTotalRevenue,
+  getProductTotalRevenue,
+  getTransactionHistory,
+};
