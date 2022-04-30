@@ -4,6 +4,8 @@ const {
   getTransactionTotalRevenue,
   getProductTotalRevenue,
   getTransactionHistory,
+  getTransactionWaitingPayment,
+  getTransactionWaitingConfirmation,
 } = require("./get");
 const {
   postWaitingPaymentTransaction,
@@ -12,7 +14,8 @@ const {
 
 router.use(getTransactionTotalRevenue);
 router.use(getProductTotalRevenue);
-router.use(getTransactionHistory);
+router.use(getTransactionWaitingPayment);
+router.use(getTransactionWaitingConfirmation);
 
 router.use(postWaitingPaymentTransaction);
 router.use(postDetailTransaction);

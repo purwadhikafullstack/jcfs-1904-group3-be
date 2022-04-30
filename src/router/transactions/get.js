@@ -58,26 +58,42 @@ const getProductTotalRevenue = router.get(
   }
 );
 
-const getTransactionHistory = router.get("/history", async (req, res) => {
+const getTransactionsByStatus = async (userId, status) => {
   try {
     const connection = await pool.promise().getConnection();
-    const { userId } = req.query;
 
-    const sqlGetTransactionsWithAddress = `select t.id as transactionId, userId,totalAmount,paymentEvidence,status,
-    addressId,province,city,district,urban_village,postal_code,detail_address,t.created_at,
-    t.updated_at from transactions as t JOIN address as a on a.id = t.addressId where userId = ? and status = "waiting payment";
-    `;
+    var sqlGetTransactionByStatus = `select t.id as transactionId, userId,totalAmount,paymentEvidence,status,
+  addressId,province,city,district,urban_village,postal_code,detail_address,t.created_at,
+  t.updated_at from transactions as t JOIN address as a on a.id = t.addressId where userId = ? and status =
+  `;
+    const dataGetTransactionByStatus = userId;
 
-    const [resultTransactionWithAddress] = await connection.query(
-      sqlGetTransactionsWithAddress,
-      userId
+    sqlGetTransactionByStatus += ` "${status}";`;
+
+    const [resultTransactions] = await connection.query(
+      sqlGetTransactionByStatus,
+      dataGetTransactionByStatus
     );
     // This will return a list of transactionId that can be used to get detailTransaction data
     // [31,32]
+
     const arrayListOfTransactionId = [];
-    resultTransactionWithAddress.filter((value) => {
+
+    resultTransactions.filter((value) => {
       arrayListOfTransactionId.push(value.transactionId);
     });
+
+    connection.release();
+
+    return { arrayListOfTransactionId, resultTransactions };
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+const getTransactionDetail = async (arrayListOfTransactionId) => {
+  try {
+    const connection = await pool.promise().getConnection();
 
     const sqlGetDetailTransactions = `select id as detailTransactionId,transactionId, productName,productPrice,productColor,productSize,quantity,productImage from detailtransactions where transactionId IN(?);
     `;
@@ -87,17 +103,63 @@ const getTransactionHistory = router.get("/history", async (req, res) => {
       dataGetDetailTransactions
     );
 
-    res.status(200).send({
-      resultTransactionWithAddress,
-      resultDetailTransactions,
-    });
+    connection.release();
+
+    return resultDetailTransactions;
   } catch (error) {
     console.log(error);
   }
-});
+};
+
+const getTransactionWaitingPayment = router.get(
+  "/status/waiting-payment",
+  async (req, res) => {
+    try {
+      const { userId } = req.query;
+
+      const { arrayListOfTransactionId, resultTransactions } =
+        await getTransactionsByStatus(userId, "waiting payment");
+
+      const resultDetailTransactions = await getTransactionDetail(
+        arrayListOfTransactionId
+      );
+
+      res.status(200).send({
+        resultTransactions,
+        resultDetailTransactions,
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  }
+);
+
+const getTransactionWaitingConfirmation = router.get(
+  "/status/waiting-confirmation",
+  async (req, res) => {
+    try {
+      const { userId } = req.query;
+
+      const { arrayListOfTransactionId, resultTransactions } =
+        await getTransactionsByStatus(userId, "waiting confirmation");
+
+      const resultDetailTransactions = await getTransactionDetail(
+        arrayListOfTransactionId
+      );
+
+      res.status(200).send({
+        resultTransactions,
+        resultDetailTransactions,
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  }
+);
 
 module.exports = {
   getTransactionTotalRevenue,
   getProductTotalRevenue,
-  getTransactionHistory,
+  getTransactionWaitingPayment,
+  getTransactionWaitingConfirmation,
 };
