@@ -157,9 +157,104 @@ const getTransactionWaitingConfirmation = router.get(
   }
 );
 
+const getTransactionPackaging = router.get(
+  "/status/packaging",
+  async (req, res) => {
+    try {
+      const { userId } = req.query;
+
+      const { arrayListOfTransactionId, resultTransactions } =
+        await getTransactionsByStatus(userId, "packaging");
+
+      const resultDetailTransactions = await getTransactionDetail(
+        arrayListOfTransactionId
+      );
+
+      res.status(200).send({
+        resultTransactions,
+        resultDetailTransactions,
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  }
+);
+
+const getTransactionDelivering = router.get(
+  "/status/delivering",
+  async (req, res) => {
+    try {
+      const { userId } = req.query;
+
+      const { arrayListOfTransactionId, resultTransactions } =
+        await getTransactionsByStatus(userId, "delivering");
+
+      const resultDetailTransactions = await getTransactionDetail(
+        arrayListOfTransactionId
+      );
+
+      res.status(200).send({
+        resultTransactions,
+        resultDetailTransactions,
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  }
+);
+
+const getTramsactionCompleted = router.get(
+  "/status/completed",
+  async (req, res) => {
+    try {
+      const { userId } = req.query;
+
+      const { arrayListOfTransactionId, resultTransactions } =
+        await getTransactionsByStatus(userId, "completed");
+
+      const resultDetailTransactions = await getTransactionDetail(
+        arrayListOfTransactionId
+      );
+
+      res.status(200).send({
+        resultTransactions,
+        resultDetailTransactions,
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  }
+);
+const getTransactionCanceled = router.get(
+  "/status/canceled",
+  async (req, res) => {
+    try {
+      const { userId } = req.query;
+
+      const { arrayListOfTransactionId, resultTransactions } =
+        await getTransactionsByStatus(userId, "canceled");
+
+      const resultDetailTransactions = await getTransactionDetail(
+        arrayListOfTransactionId
+      );
+
+      res.status(200).send({
+        resultTransactions,
+        resultDetailTransactions,
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  }
+);
+
 module.exports = {
   getTransactionTotalRevenue,
   getProductTotalRevenue,
   getTransactionWaitingPayment,
   getTransactionWaitingConfirmation,
+  getTransactionPackaging,
+  getTransactionDelivering,
+  getTramsactionCompleted,
+  getTransactionCanceled,
 };
