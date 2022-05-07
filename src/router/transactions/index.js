@@ -19,6 +19,8 @@ const {
   putFinishPackagingPayment,
 } = require("./admin/put");
 
+const { putFinishDeliveringPayment } = require("./put");
+
 router.use(getTransactionTotalRevenue);
 router.use(getProductTotalRevenue);
 router.use(getUserTransactionByStatus);
@@ -31,5 +33,7 @@ router.use(postDetailTransaction);
 router.use(putApproveWaitingPayment);
 router.use(putRejectWaitingPayment);
 router.use(putFinishPackagingPayment);
+
+router.use(putFinishDeliveringPayment);
 
 module.exports = router;
