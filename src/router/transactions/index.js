@@ -1,13 +1,6 @@
 const router = require("express").Router();
 
-const {
-  getTransactionPackaging,
-  getTransactionWaitingPayment,
-  getTransactionWaitingConfirmation,
-  getTransactionDelivering,
-  getTramsactionCompleted,
-  getTransactionComplained,
-} = require("./get");
+const { getUserTransactionByStatus } = require("./get");
 
 const {
   getTransactionTotalRevenue,
@@ -26,14 +19,9 @@ const {
   putFinishPackagingPayment,
 } = require("./admin/put");
 
-router.use(getTransactionPackaging);
 router.use(getTransactionTotalRevenue);
 router.use(getProductTotalRevenue);
-router.use(getTransactionWaitingPayment);
-router.use(getTransactionWaitingConfirmation);
-router.use(getTransactionDelivering);
-router.use(getTramsactionCompleted);
-router.use(getTransactionComplained);
+router.use(getUserTransactionByStatus);
 
 router.use(getAllTransactionByStatus);
 
