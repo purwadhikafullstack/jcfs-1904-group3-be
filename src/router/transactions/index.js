@@ -1,19 +1,30 @@
 const router = require("express").Router();
 
 const {
-  getTransactionTotalRevenue,
-  getProductTotalRevenue,
   getTransactionPackaging,
   getTransactionWaitingPayment,
   getTransactionWaitingConfirmation,
   getTransactionDelivering,
   getTramsactionCompleted,
-  getTransactionCanceled,
+  getTransactionComplained,
 } = require("./get");
+
+const {
+  getTransactionTotalRevenue,
+  getProductTotalRevenue,
+  getAllTransactionByStatus,
+} = require("./admin/get");
+
 const {
   postWaitingPaymentTransaction,
   postDetailTransaction,
 } = require("./post");
+
+const {
+  putApproveWaitingPayment,
+  putRejectWaitingPayment,
+  putFinishPackagingPayment,
+} = require("./admin/put");
 
 router.use(getTransactionPackaging);
 router.use(getTransactionTotalRevenue);
@@ -22,9 +33,15 @@ router.use(getTransactionWaitingPayment);
 router.use(getTransactionWaitingConfirmation);
 router.use(getTransactionDelivering);
 router.use(getTramsactionCompleted);
-router.use(getTransactionCanceled);
+router.use(getTransactionComplained);
+
+router.use(getAllTransactionByStatus);
 
 router.use(postWaitingPaymentTransaction);
 router.use(postDetailTransaction);
+
+router.use(putApproveWaitingPayment);
+router.use(putRejectWaitingPayment);
+router.use(putFinishPackagingPayment);
 
 module.exports = router;
