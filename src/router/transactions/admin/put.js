@@ -50,7 +50,7 @@ const putFinishPackagingPayment = router.put(
   "/finish/packaging",
   async (req, res) => {
     try {
-      const { transactionId } = req.body;
+      const { transactionId, items } = req.body;
 
       const connection = await pool.promise().getConnection();
       const sqlPutFinishPackagingPayment = `UPDATE transactions set status = "delivering" where id = ?;`;
@@ -59,6 +59,21 @@ const putFinishPackagingPayment = router.put(
         sqlPutFinishPackagingPayment,
         transactionId
       );
+      items.filter(async (value) => {
+        const sqlUpdateStock = `UPDATE products join variant on products.id = variant.productId 
+        set qtyAvailable=qtyavailable-?
+        where productName=? and color=?;`;
+        const dataUpdateStock = [
+          value.quantity,
+          value.productName,
+          value.productColor,
+        ];
+        const [result] = await connection.query(
+          sqlUpdateStock,
+          dataUpdateStock
+        );
+      });
+
       connection.release();
 
       res.status(200).send({ message: "Data telah berhasil di perbarui" });
