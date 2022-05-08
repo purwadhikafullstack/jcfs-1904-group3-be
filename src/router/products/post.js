@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const pool = require("../../config/database");
-const { uploadProducts } = require("../services/multer");
+const { uploadProducts } = require("../../services/multer");
 
 const uploadProductImage = uploadProducts.single("image");
 

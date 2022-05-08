@@ -1,35 +1,32 @@
-const connection = require("../../config/database");
+const pool = require("../../config/database");
 const { verify } = require("../../services/token");
 
-const auth = (req, res, next) => {
-  const token = req.headers.authorization.replace("Bearer ", "");
-  console.log(req.headers);
-  const verifiedToken = verify(token);
+const auth = async (req, res, next) => {
+  try {
+    const connection = await pool.promise().getConnection();
 
-  const sql = "SELECT * FROM tokens WHERE user_id = ? AND token= ?;";
+    const token = req.headers.authorization.replace("Bearer ", "");
 
-  const data = [verifiedToken.id, token];
+    const verifiedToken = verify(token);
 
-  connection.query(sql, data, (err, result) => {
-    if (err) return res.status(500).send({ err });
+    const sqlVerifyToken =
+      "SELECT * FROM tokens WHERE user_id = ? AND token= ?;";
+    const dataVerifyToken = [verifiedToken.id, token];
+    const [resultToken] = await connection.query(sqlVerifyToken);
 
-    if (!result[0])
+    if (!resultToken[0])
       return res.status(404).send({ message: "Token is expired" });
-  });
 
-  const sqlGetUser = "SELECT * FROM users WHERE id = ?";
-  const dataGetUser = verifiedToken.id;
+    const sqlGetUser = "SELECT * FROM users WHERE id = ?";
 
-  connection.query(sqlGetUser, dataGetUser, (err, users) => {
-    if (err) return res.status(500).send({ err });
-
-    // Jika user tidak ditemukan
-    if (!users[0]) return res.status(404).send({ message: "User not found" });
-
-    req.user = users[0];
-
+    const [resultUser] = await connection.query(sqlGetUser, verifiedToken.id);
+    connection.release();
+    if (!resultUser[0])
+      return res.status(404).send({ message: "User not found" });
     next();
-  });
+  } catch (error) {
+    console.log(error);
+  }
 };
 
 module.exports = auth;

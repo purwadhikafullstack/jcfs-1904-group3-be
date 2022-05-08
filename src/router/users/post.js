@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const pool = require("../../config/database");
 const bcrypt = require("bcryptjs");
+const { sign } = require("../../services/token");
 
 const postRegisterUser = router.post("/register", async (req, res) => {
   try {
@@ -36,6 +37,8 @@ const postLoginRouter = router.post("/login", async (req, res) => {
     const [result] = await connection.query(sqlPostLoginRouter, username);
     connection.release();
 
+    const user = result[0];
+
     if (!result.length) {
       return res.status(404).send({ message: "User not found" });
     }
@@ -44,8 +47,17 @@ const postLoginRouter = router.post("/login", async (req, res) => {
     if (!compareResult) {
       return res.status(401).send({ message: "Wrong password" });
     }
+    const token = sign({ id: user.id });
 
-    res.status(200).send({ message: "successfuly login", result: result[0] });
+    const sqlInsertToken = "INSERT INTO tokens SET ?;";
+    const dataInsertToken = { user_id: user.id, token };
+
+    const [resultToken] = await connection.query(
+      sqlInsertToken,
+      dataInsertToken
+    );
+
+    res.status(200).send({ message: "successfuly login", user, token });
   } catch (error) {
     console.log(error);
   }

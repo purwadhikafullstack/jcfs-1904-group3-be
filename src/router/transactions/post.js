@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const pool = require("../../config/database");
 
-const { uploadPaymentEvidence } = require("../services/multer");
+const { uploadPaymentEvidence } = require("../../services/multer");
 
 const multerUploadPaymentEvidence = uploadPaymentEvidence.single("image");
 
