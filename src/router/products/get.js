@@ -282,6 +282,7 @@ const getVariantsProducts = router.get("/productDetail", async (req, res) => {
       res.status(200).send({ result, dataCount });
     } else {
       const { id } = req.query;
+
       const productId = id;
       const sqlGetProductList = `SELECT p.id AS productId,
       p.productName,
@@ -297,6 +298,7 @@ const getVariantsProducts = router.get("/productDetail", async (req, res) => {
       Where p.id = ?;`;
 
       const [result] = await connection.query(sqlGetProductList, productId);
+      console.log(result);
       connection.release();
 
       res.status(200).send({ result });

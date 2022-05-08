@@ -54,9 +54,12 @@ const getProductTotalRevenue = router.get(
       }
 
       const [result] = await connection.query(sqlGetProductTotalRevenue, data);
-      connection.release();
 
-      res.status(200).send({ result });
+      const getProductId = `select id from products where productName like ?`;
+      const [productId] = await connection.query(getProductId, productName);
+      console.log(productId);
+      connection.release;
+      res.status(200).send({ result, productId });
     } catch (error) {
       console.log(error);
     }
