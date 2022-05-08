@@ -4,9 +4,11 @@ const {
   getTransactionsByStatus,
   getTransactionDetail,
 } = require("./component");
+const auth = require("../../middleware/auth");
 
 const getUserTransactionByStatus = router.get(
   "/user/status",
+  auth,
   async (req, res) => {
     try {
       const { userId, status } = req.query;

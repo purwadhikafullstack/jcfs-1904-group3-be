@@ -3,11 +3,11 @@ const path = require("path");
 
 const photoDirectoryProducts = path.join(
   __dirname,
-  "../../../../public/images/products"
+  "../../../public/images/products"
 );
 const photoDirectoryPayment = path.join(
   __dirname,
-  "../../../../public/images/payment"
+  "../../../public/images/payment"
 );
 
 const storageProducts = multer.diskStorage({

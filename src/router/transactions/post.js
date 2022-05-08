@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const pool = require("../../config/database");
+const auth = require("../../middleware/auth");
 
 const { uploadPaymentEvidence } = require("../../services/multer");
 
@@ -8,6 +9,7 @@ const multerUploadPaymentEvidence = uploadPaymentEvidence.single("image");
 
 const postWaitingPaymentTransaction = router.post(
   "/waiting-payment",
+  auth,
   async (req, res) => {
     try {
       const connection = await pool.promise().getConnection();
@@ -36,7 +38,7 @@ const postWaitingPaymentTransaction = router.post(
   }
 );
 
-const postDetailTransaction = router.post("/detail", async (req, res) => {
+const postDetailTransaction = router.post("/detail", auth, async (req, res) => {
   try {
     const connection = await pool.promise().getConnection();
     const { carts, transactionId } = req.body;
@@ -68,6 +70,7 @@ const postDetailTransaction = router.post("/detail", async (req, res) => {
 });
 const postPaymentEvidence = router.post(
   "/evidence/payment",
+  auth,
   multerUploadPaymentEvidence,
   async (req, res) => {
     try {

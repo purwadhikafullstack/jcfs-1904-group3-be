@@ -6,13 +6,15 @@ const auth = async (req, res, next) => {
     const connection = await pool.promise().getConnection();
 
     const token = req.headers.authorization.replace("Bearer ", "");
-
     const verifiedToken = verify(token);
 
     const sqlVerifyToken =
-      "SELECT * FROM tokens WHERE user_id = ? AND token= ?;";
+      "SELECT * FROM tokens WHERE user_id = ? AND token = ?;";
     const dataVerifyToken = [verifiedToken.id, token];
-    const [resultToken] = await connection.query(sqlVerifyToken);
+    const [resultToken] = await connection.query(
+      sqlVerifyToken,
+      dataVerifyToken
+    );
 
     if (!resultToken[0])
       return res.status(404).send({ message: "Token is expired" });
@@ -23,6 +25,7 @@ const auth = async (req, res, next) => {
     connection.release();
     if (!resultUser[0])
       return res.status(404).send({ message: "User not found" });
+
     next();
   } catch (error) {
     console.log(error);

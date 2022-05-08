@@ -1,7 +1,8 @@
 const router = require("express").Router();
 const pool = require("../../config/database");
+const auth = require("../../middleware/auth");
 
-const postCart = router.post("/", async (req, res) => {
+const postCart = router.post("/", auth, async (req, res) => {
   try {
     const connection = await pool.promise().getConnection();
     const { userId, productId, productQuantity, variantId } = req.body;

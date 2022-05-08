@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const pool = require("../../config/database");
+const auth = require("../../middleware/auth");
 
 const getProducts = router.get("/", async (req, res) => {
   try {
@@ -16,7 +17,7 @@ const getProducts = router.get("/", async (req, res) => {
   }
 });
 
-const getCartsProductVariant = router.get("/cart", async (req, res) => {
+const getCartsProductVariant = router.get("/cart", auth, async (req, res) => {
   try {
     const connection = await pool.promise().getConnection();
     const { result } = req.query;

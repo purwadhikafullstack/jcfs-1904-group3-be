@@ -33,7 +33,7 @@ const postLoginRouter = router.post("/login", async (req, res) => {
     const { username, password } = req.body;
 
     const sqlPostLoginRouter =
-      "SELECT id,username,password FROM users WHERE username = ?";
+      "SELECT id,username,password,role FROM users WHERE username = ?";
     const [result] = await connection.query(sqlPostLoginRouter, username);
     connection.release();
 
@@ -56,6 +56,8 @@ const postLoginRouter = router.post("/login", async (req, res) => {
       sqlInsertToken,
       dataInsertToken
     );
+
+    connection.release();
 
     res.status(200).send({ message: "successfuly login", user, token });
   } catch (error) {
