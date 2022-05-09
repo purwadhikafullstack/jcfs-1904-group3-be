@@ -8,14 +8,16 @@ const uploadProductImage = uploadProducts.single("image");
 const postProduct = router.post("/", async (req, res) => {
   try {
     const connection = await pool.promise().getConnection();
-    const { productName } = req.body;
+    const { addedProductName } = req.body;
+    console.log(req.body);
     const sqlPostProduct = `INSERT INTO products SET productName = ?`;
 
-    const [result] = await connection.query(sqlPostProduct, productName);
-    connection.release();
+    const [result] = await connection.query(sqlPostProduct, addedProductName);
 
     const sqlGetNewProduct = `SELECT id FROM products ORDER BY id DESC LIMIT 1`;
     const [getProduct] = await connection.query(sqlGetNewProduct);
+
+    connection.release();
 
     res.status(200).send(getProduct[0]);
   } catch (error) {
@@ -43,7 +45,7 @@ const postProductVariant = router.post("/variant", async (req, res) => {
   try {
     const connection = await pool.promise().getConnection();
 
-    const { quantity, productId, color, price, warehouseId } = req.body;
+    const { quantity, productId, color, price, warehouseId, size } = req.body;
 
     if (!req.body.size) {
       delete req.body.size;
@@ -57,9 +59,24 @@ const postProductVariant = router.post("/variant", async (req, res) => {
     const qtyTotal = quantity;
     const qtyAvailable = quantity;
 
-    const sqlPostProductVariant = `INSERT INTO variant
+    var sqlPostProductVariant = `INSERT INTO variant
     (color, price, warehouseId, qtyTotal, qtyAvailable, productId) values(?,?,?,?,?,?);`;
-    const data = [color, price, warehouseId, qtyTotal, qtyAvailable, productId];
+
+    var data = [color, price, warehouseId, qtyTotal, qtyAvailable, productId];
+
+    if (req.body.size) {
+      sqlPostProductVariant = `INSERT INTO variant
+    (color, price, warehouseId, qtyTotal, qtyAvailable, productId,size) values(?,?,?,?,?,?,?);`;
+      var data = [
+        color,
+        price,
+        warehouseId,
+        qtyTotal,
+        qtyAvailable,
+        productId,
+        size,
+      ];
+    }
 
     const [resultPost] = await connection.query(sqlPostProductVariant, data);
 

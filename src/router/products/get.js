@@ -6,7 +6,7 @@ const auth = require("../../middleware/auth");
 const getProducts = router.get("/", async (req, res) => {
   try {
     const connection = await pool.promise().getConnection();
-    const sqlGetProducts = `select id as productId, productName from products;`;
+    const sqlGetProducts = `select id as productId, productName from products where isDelete = 0;`;
 
     const [result] = await connection.query(sqlGetProducts);
     connection.release();
@@ -46,7 +46,7 @@ const getCartsProductVariant = router.get("/cart", auth, async (req, res) => {
     v.qtyAvailable,
     v.qtyTotal FROM products as p
     JOIN variant as v ON v.productId = p.id
-    where  p.id in(?) and v.id in(?)`;
+    where  p.id in(?) and v.id in(?) and where isDelete = 0`;
 
     const data = [productId, variantId];
 
@@ -103,7 +103,7 @@ const getProductsByCategory = async (keyWord, limit, offset, order, sortBy) => {
     Where p.id IN(SELECT distinct p.id FROM products as p
     JOIN categories_products as c_p ON c_p.productId = p.id 
     JOIN categories as c ON c.id = c_p.categoryId 
-    WHERE c.categoryName LIKE ?
+    WHERE c.categoryName LIKE ? and where isDelete = 0
     ORDER by p.id);`;
     var getProductsByCategory = `SELECT p.id AS productId,
     p.productName,
@@ -119,7 +119,7 @@ const getProductsByCategory = async (keyWord, limit, offset, order, sortBy) => {
     Where p.id IN(SELECT distinct p.id FROM products as p
     JOIN categories_products as c_p ON c_p.productId = p.id 
     JOIN categories as c ON c.id = c_p.categoryId 
-    WHERE c.categoryName LIKE ?
+    WHERE c.categoryName LIKE ? and where isDelete = 0
     ORDER by p.id)
     GROUP BY p.id `;
     if (sortBy && order) {
@@ -168,7 +168,7 @@ const getFilteredProduct = router.get("/filtered", async (req, res) => {
       if (!result.length) {
         const sqlGetTotalData = `SELECT count( distinct p.id) as total FROM products as p
         JOIN variant as v ON v.productId = p.id
-        Where p.productName Like  ? or v.color Like ? or v.size Like ?;`;
+        Where and where isDelete = 0 and p.productName Like  ? or v.color Like ? or v.size Like ?;`;
         var getProductByKeyword = ` SELECT p.id AS productId,
         p.productName,
         v.warehouseId,
@@ -180,7 +180,7 @@ const getFilteredProduct = router.get("/filtered", async (req, res) => {
         v.qtyAvailable,
         v.qtyTotal FROM products as p
         JOIN variant as v ON v.productId = p.id
-        Where p.productName Like ? or v.color Like ? or v.size Like ?
+        Where p.productName Like ? and where isDelete = 0 or v.color Like ? or v.size Like ?
         GROUP BY p.id `;
 
         if (sortBy && order) {
@@ -219,7 +219,7 @@ const getFilteredProduct = router.get("/filtered", async (req, res) => {
       res.status(200).send({ result, dataCount });
     } else {
       const sqlGetTotalData = `SELECT count(distinct p.id) as total FROM products as p
-      JOIN variant as v ON v.productId = p.id;`;
+      JOIN variant as v ON v.productId = p.id  where isDelete = 0;`;
       var sqlGetProductList = `SELECT p.id AS productId,
       p.productName,
       v.warehouseId,
@@ -230,7 +230,7 @@ const getFilteredProduct = router.get("/filtered", async (req, res) => {
       v.image,
       v.qtyAvailable,
       v.qtyTotal FROM products as p
-      JOIN variant as v ON v.productId = p.id
+      JOIN variant as v ON v.productId = p.id  where isDelete = 0
       GROUP BY p.id `;
       if (sortBy && order) {
         sqlGetProductList += `ORDER BY ${sortBy} ${order} LIMIT ${limit} OFFSET ${offset};`;

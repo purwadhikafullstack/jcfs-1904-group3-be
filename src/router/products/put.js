@@ -5,15 +5,14 @@ const pool = require("../../config/database");
 const putProductRouter = router.put("/", async (req, res) => {
   try {
     const { productData, productId, variantId } = req.body;
-    const { productName, color, price, qtyTotal } = productData;
-
+    const { productName, color, price, qtyTotal, qtyAvailable } = productData;
     const connection = await pool.promise().getConnection();
     const sqlPutProduct = `UPDATE products as p
     join variant as v on v.productId = p.id
     SET ? Where productId = ? and v.id = ?;`;
 
     const data = [
-      { productName, color, price, qtyTotal },
+      { productName, color, price, qtyTotal, qtyAvailable },
       productId,
       variantId,
     ];
