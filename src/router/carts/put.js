@@ -1,14 +1,15 @@
 const express = require("express");
 const router = express.Router();
 const pool = require("../../config/database");
+const auth = require("../../middleware/auth");
 
-const putCartQuantity = router.put("/", async (req, res) => {
+const putCartQuantity = router.put("/", auth, async (req, res) => {
   try {
-    const { cartId, productQuantity } = req.body;
-
     const connection = await pool.promise().getConnection();
+
+    const { cartId, productQuantity } = req.body;
     const sqlPutCartQuantity = `UPDATE carts 
-    SET productQuantity = ? Where id = ?;`;
+    SET productQuantity = ?  Where id = ?;`;
 
     const data = [productQuantity, cartId];
     const [result] = await connection.query(sqlPutCartQuantity, data);
