@@ -74,7 +74,7 @@ const postWaitingPaymentTransaction = router.post(
         var dayInMilliseconds = 1000 * 60 * 60 * 24;
         setTimeout(() => {
           setRejectPayment(transaction.insertId);
-        }, 20000);
+        }, dayInMilliseconds);
 
         connection.release();
 
