@@ -4,7 +4,7 @@ const pool = require("../../config/database");
 const bcrypt = require("bcryptjs");
 const { sign } = require("../../services/token");
 
-const postRegisterUser = router.post("/register", async (req, res) => {
+const postRegisterUser = router.post("/register", async (req, res, next) => {
   try {
     const connection = await pool.promise().getConnection();
 
@@ -22,11 +22,11 @@ const postRegisterUser = router.post("/register", async (req, res) => {
 
     res.status(200).send({ message: "detail transaction succesfuly added" });
   } catch (error) {
-    console.log(error);
+    next(error);
   }
 });
 
-const postLoginRouter = router.post("/login", async (req, res) => {
+const postLoginRouter = router.post("/login", async (req, res, next) => {
   try {
     const connection = await pool.promise().getConnection();
 
@@ -61,7 +61,7 @@ const postLoginRouter = router.post("/login", async (req, res) => {
 
     res.status(200).send({ message: "successfuly login", user, token });
   } catch (error) {
-    console.log(error);
+    next(error);
   }
 });
 

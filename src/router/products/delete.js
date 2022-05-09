@@ -3,7 +3,7 @@ const req = require("express/lib/request");
 const router = express.Router();
 const pool = require("../../config/database");
 
-const deleteProduct = router.delete("/", async (req, res) => {
+const deleteProduct = router.delete("/", async (req, res, next) => {
   try {
     const { productId } = req.body;
 
@@ -16,13 +16,13 @@ const deleteProduct = router.delete("/", async (req, res) => {
 
     res.status(200).send({ message: "data berhasil di hapus" });
   } catch (error) {
-    console.log(error);
+    next(error);
   }
 });
 
 const deleteProductCategoryRouter = router.delete(
   "/category",
-  async (req, res) => {
+  async (req, res, next) => {
     try {
       const connection = await pool.promise().getConnection();
 
@@ -36,7 +36,7 @@ const deleteProductCategoryRouter = router.delete(
 
       res.status(200).send({ message: "data berhasil di hapus" });
     } catch (error) {
-      console.log(error);
+      next(error);
     }
   }
 );

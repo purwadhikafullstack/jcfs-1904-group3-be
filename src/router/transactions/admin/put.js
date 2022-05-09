@@ -4,7 +4,7 @@ const pool = require("../../../config/database");
 
 const putApproveWaitingPayment = router.put(
   "/approve/waiting-payment",
-  async (req, res) => {
+  async (req, res, next) => {
     try {
       const { transactionId } = req.body;
 
@@ -19,14 +19,14 @@ const putApproveWaitingPayment = router.put(
 
       res.status(200).send({ message: "Data telah berhasil di perbarui" });
     } catch (error) {
-      console.log(error);
+      next(error);
     }
   }
 );
 
 const putRejectWaitingPayment = router.put(
   "/reject/waiting-payment",
-  async (req, res) => {
+  async (req, res, next) => {
     try {
       const { transactionId } = req.body;
 
@@ -41,14 +41,14 @@ const putRejectWaitingPayment = router.put(
 
       res.status(200).send({ message: "Data telah berhasil di perbarui" });
     } catch (error) {
-      console.log(error);
+      next(error);
     }
   }
 );
 
 const putFinishPackagingPayment = router.put(
   "/finish/packaging",
-  async (req, res) => {
+  async (req, res, next) => {
     try {
       const { transactionId, items } = req.body;
 
@@ -64,7 +64,7 @@ const putFinishPackagingPayment = router.put(
 
       res.status(200).send({ message: "Data telah berhasil di perbarui" });
     } catch (error) {
-      console.log(error);
+      next(error);
     }
   }
 );

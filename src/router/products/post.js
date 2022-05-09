@@ -5,11 +5,11 @@ const { uploadProducts } = require("../../services/multer");
 
 const uploadProductImage = uploadProducts.single("image");
 
-const postProduct = router.post("/", async (req, res) => {
+const postProduct = router.post("/", async (req, res, next) => {
   try {
     const connection = await pool.promise().getConnection();
     const { addedProductName } = req.body;
-    console.log(req.body);
+
     const sqlPostProduct = `INSERT INTO products SET productName = ?`;
 
     const [result] = await connection.query(sqlPostProduct, addedProductName);
@@ -21,11 +21,11 @@ const postProduct = router.post("/", async (req, res) => {
 
     res.status(200).send(getProduct[0]);
   } catch (error) {
-    console.log(error);
+    next(error);
   }
 });
 
-const postProductCategory = router.post("/category", async (req, res) => {
+const postProductCategory = router.post("/category", async (req, res, next) => {
   try {
     const connection = await pool.promise().getConnection();
     const { productId, categoryId } = req.body;
@@ -37,11 +37,11 @@ const postProductCategory = router.post("/category", async (req, res) => {
 
     res.status(200).send({ message: "Data telah berhasil di tambahkan" });
   } catch (error) {
-    console.log(error);
+    next(error);
   }
 });
 
-const postProductVariant = router.post("/variant", async (req, res) => {
+const postProductVariant = router.post("/variant", async (req, res, next) => {
   try {
     const connection = await pool.promise().getConnection();
 
@@ -88,14 +88,14 @@ const postProductVariant = router.post("/variant", async (req, res) => {
       .status(200)
       .send({ message: "Data telah berhasil di tambahkan", resultGet });
   } catch (error) {
-    console.log(error);
+    next(error);
   }
 });
 
 const postVariantImage = router.post(
   "/variant/image",
   uploadProductImage,
-  async (req, res) => {
+  async (req, res, next) => {
     try {
       const connection = await pool.promise().getConnection();
 
@@ -112,7 +112,7 @@ const postVariantImage = router.post(
 
       res.status(200).send({ message: "Data telah berhasil di tambahkan" });
     } catch (error) {
-      console.log(error);
+      next(error);
     }
   }
 );

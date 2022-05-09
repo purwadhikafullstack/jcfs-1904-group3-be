@@ -9,7 +9,7 @@ const auth = require("../../middleware/auth");
 const getUserTransactionByStatus = router.get(
   "/user/status",
   auth,
-  async (req, res) => {
+  async (req, res, next) => {
     try {
       const { userId, status } = req.query;
 
@@ -31,7 +31,7 @@ const getUserTransactionByStatus = router.get(
         });
       }
     } catch (error) {
-      console.log(error);
+      next(error);
     }
   }
 );

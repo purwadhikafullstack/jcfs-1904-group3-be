@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const pool = require("../../config/database");
 
-const putProductRouter = router.put("/", async (req, res) => {
+const putProductRouter = router.put("/", async (req, res, next) => {
   try {
     const { productData, productId, variantId } = req.body;
     const { productName, color, price, qtyTotal, qtyAvailable } = productData;
@@ -21,7 +21,7 @@ const putProductRouter = router.put("/", async (req, res) => {
 
     res.status(200).send({ message: "Data telah berhasil di perbarui" });
   } catch (error) {
-    console.log(error);
+    next(error);
   }
 });
 

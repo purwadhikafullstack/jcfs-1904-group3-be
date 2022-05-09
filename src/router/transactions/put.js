@@ -7,7 +7,7 @@ const auth = require("../../middleware/auth");
 const putFinishDeliveringPayment = router.put(
   "/finish/delivering",
   auth,
-  async (req, res) => {
+  async (req, res, next) => {
     try {
       const { transactionId, items } = req.body;
 
@@ -38,7 +38,7 @@ const putFinishDeliveringPayment = router.put(
 
       res.status(200).send({ message: "Data telah berhasil di perbarui" });
     } catch (error) {
-      console.log(error);
+      next(error);
     }
   }
 );
