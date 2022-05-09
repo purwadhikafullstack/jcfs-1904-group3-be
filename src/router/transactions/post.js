@@ -15,26 +15,27 @@ const postWaitingPaymentTransaction = router.post(
       const connection = await pool.promise().getConnection();
       const { totalAmount, userId, addressId, carts } = req.body;
       const setRejectPayment = async (transactionId) => {
-        const sqlPutRejectPayment = `UPDATE transactions set status = "rejected" where id = ?;`;
+        const sqlPutRejectPayment = `UPDATE transactions set status = "rejected" where id = ? and status="waiting payment";`;
 
         const [rejectPayment] = await connection.query(
           sqlPutRejectPayment,
           transactionId
         );
-        carts.filter(async (value) => {
-          const sqlUpdateStock = `UPDATE products join variant on products.id = variant.productId 
-          set qtyAvailable=qtyavailable+?
-          where variant.id = ?;`;
-          const dataUpdateStock = [value.productQuantity, value.variantId];
-          const [updateStock] = await connection.query(
-            sqlUpdateStock,
-            dataUpdateStock
-          );
-        });
+        if (rejectPayment.insertId) {
+          carts.filter(async (value) => {
+            const sqlUpdateStock = `UPDATE products join variant on products.id = variant.productId 
+              set qtyAvailable=qtyavailable+?
+              where variant.id = ?;`;
+            const dataUpdateStock = [value.productQuantity, value.variantId];
+            const [updateStock] = await connection.query(
+              sqlUpdateStock,
+              dataUpdateStock
+            );
+          });
+        }
       };
       var checkedStock;
-      console.log(checkedStock);
-      console.log(carts);
+
       for (var i = 0; i < carts.length; i++) {
         const sqlCheckStock = `select qtyAvailable from variant where id = ?`;
         const dataCheckStock = carts[i].variantId;
