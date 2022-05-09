@@ -298,7 +298,6 @@ const getVariantsProducts = router.get("/productDetail", async (req, res) => {
       Where p.id = ?;`;
 
       const [result] = await connection.query(sqlGetProductList, productId);
-      console.log(result);
       connection.release();
 
       res.status(200).send({ result });

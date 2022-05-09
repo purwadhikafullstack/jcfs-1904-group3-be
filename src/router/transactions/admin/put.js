@@ -59,20 +59,6 @@ const putFinishPackagingPayment = router.put(
         sqlPutFinishPackagingPayment,
         transactionId
       );
-      items.filter(async (value) => {
-        const sqlUpdateStock = `UPDATE products join variant on products.id = variant.productId 
-        set qtyAvailable=qtyavailable-?
-        where productName=? and color=?;`;
-        const dataUpdateStock = [
-          value.quantity,
-          value.productName,
-          value.productColor,
-        ];
-        const [result] = await connection.query(
-          sqlUpdateStock,
-          dataUpdateStock
-        );
-      });
 
       connection.release();
 
