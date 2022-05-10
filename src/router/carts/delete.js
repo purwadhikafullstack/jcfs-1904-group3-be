@@ -4,7 +4,7 @@ const router = express.Router();
 const pool = require("../../config/database");
 const auth = require("../../middleware/auth");
 
-const deleteCarts = router.delete("/", auth, async (req, res) => {
+const deleteCarts = router.delete("/", auth, async (req, res, next) => {
   try {
     const { cartId } = req.body;
 
@@ -17,31 +17,34 @@ const deleteCarts = router.delete("/", auth, async (req, res) => {
 
     res.status(200).send({ message: "data berhasil di hapus" });
   } catch (error) {
-    console.log(error);
+    next(error);
   }
 });
 
-const deleteCartWhenCheckout = router.delete("/checkout", async (req, res) => {
-  try {
-    // delete cart when the item successfuly checkout
-    // idCarts is an array of object consisting the cart that recently just got checkout
-    const { idCarts } = req.body;
+const deleteCartWhenCheckout = router.delete(
+  "/checkout",
+  async (req, res, next) => {
+    try {
+      // delete cart when the item successfuly checkout
+      // idCarts is an array of object consisting the cart that recently just got checkout
+      const { idCarts } = req.body;
 
-    const connection = await pool.promise().getConnection();
+      const connection = await pool.promise().getConnection();
 
-    const sqlDeleteCartWhenCheckout = `update carts set isDelete = 1,productQuantity = 0 where id in(?)`;
-    const dataDeleteCartWhenCheckout = [idCarts];
+      const sqlDeleteCartWhenCheckout = `update carts set isDelete = 1,productQuantity = 0 where id in(?)`;
+      const dataDeleteCartWhenCheckout = [idCarts];
 
-    const [result] = await connection.query(
-      sqlDeleteCartWhenCheckout,
-      dataDeleteCartWhenCheckout
-    );
+      const [result] = await connection.query(
+        sqlDeleteCartWhenCheckout,
+        dataDeleteCartWhenCheckout
+      );
 
-    connection.release();
+      connection.release();
 
-    res.status(200).send({ message: "data berhasil di hapus" });
-  } catch (error) {
-    console.log(error);
+      res.status(200).send({ message: "data berhasil di hapus" });
+    } catch (error) {
+      next(error);
+    }
   }
-});
+);
 module.exports = { deleteCarts, deleteCartWhenCheckout };

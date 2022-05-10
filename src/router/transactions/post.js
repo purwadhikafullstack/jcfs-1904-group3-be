@@ -10,31 +10,32 @@ const multerUploadPaymentEvidence = uploadPaymentEvidence.single("image");
 const postWaitingPaymentTransaction = router.post(
   "/waiting-payment",
   auth,
-  async (req, res) => {
+  async (req, res, next) => {
     try {
       const connection = await pool.promise().getConnection();
       const { totalAmount, userId, addressId, carts } = req.body;
       const setRejectPayment = async (transactionId) => {
-        const sqlPutRejectPayment = `UPDATE transactions set status = "rejected" where id = ?;`;
+        const sqlPutRejectPayment = `UPDATE transactions set status = "rejected" where id = ? and status="waiting payment";`;
 
         const [rejectPayment] = await connection.query(
           sqlPutRejectPayment,
           transactionId
         );
-        carts.filter(async (value) => {
-          const sqlUpdateStock = `UPDATE products join variant on products.id = variant.productId 
-          set qtyAvailable=qtyavailable+?
-          where variant.id = ?;`;
-          const dataUpdateStock = [value.productQuantity, value.variantId];
-          const [updateStock] = await connection.query(
-            sqlUpdateStock,
-            dataUpdateStock
-          );
-        });
+        if (rejectPayment.insertId) {
+          carts.filter(async (value) => {
+            const sqlUpdateStock = `UPDATE products join variant on products.id = variant.productId 
+              set qtyAvailable=qtyavailable+?
+              where variant.id = ?;`;
+            const dataUpdateStock = [value.productQuantity, value.variantId];
+            const [updateStock] = await connection.query(
+              sqlUpdateStock,
+              dataUpdateStock
+            );
+          });
+        }
       };
       var checkedStock;
-      console.log(checkedStock);
-      console.log(carts);
+
       for (var i = 0; i < carts.length; i++) {
         const sqlCheckStock = `select qtyAvailable from variant where id = ?`;
         const dataCheckStock = carts[i].variantId;
@@ -74,7 +75,7 @@ const postWaitingPaymentTransaction = router.post(
         var dayInMilliseconds = 1000 * 60 * 60 * 24;
         setTimeout(() => {
           setRejectPayment(transaction.insertId);
-        }, 20000);
+        }, dayInMilliseconds);
 
         connection.release();
 
@@ -89,46 +90,50 @@ const postWaitingPaymentTransaction = router.post(
         });
       }
     } catch (error) {
-      console.log(error);
+      next(error);
     }
   }
 );
 
-const postDetailTransaction = router.post("/detail", auth, async (req, res) => {
-  try {
-    const connection = await pool.promise().getConnection();
-    const { carts, transactionId } = req.body;
+const postDetailTransaction = router.post(
+  "/detail",
+  auth,
+  async (req, res, next) => {
+    try {
+      const connection = await pool.promise().getConnection();
+      const { carts, transactionId } = req.body;
 
-    const mappingCarts = () => {
-      var values = ``;
-      carts.forEach((value, index) => {
-        if (!value.size) {
-          values += `(${transactionId},"${value.productName}",${value.price},"${value.variant}",null,${value.productQuantity},"${value.image}")`;
-        }
-        if (value.size) {
-          values += `(${transactionId},"${value.productName}",${value.price},"${value.variant}","${value.size}",${value.productQuantity},"${value.image}")`;
-        }
-        if (carts.length - 1 != index) {
-          values += `,`;
-        }
-      });
-      return values;
-    };
-    const sqlPostDetailTransaction = `INSERT INTO detailtransactions (transactionId,productName,productPrice,productColor,productSize,quantity,productImage) values${mappingCarts()};`;
+      const mappingCarts = () => {
+        var values = ``;
+        carts.forEach((value, index) => {
+          if (!value.size) {
+            values += `(${transactionId},"${value.productName}",${value.price},"${value.variant}",null,${value.productQuantity},"${value.image}")`;
+          }
+          if (value.size) {
+            values += `(${transactionId},"${value.productName}",${value.price},"${value.variant}","${value.size}",${value.productQuantity},"${value.image}")`;
+          }
+          if (carts.length - 1 != index) {
+            values += `,`;
+          }
+        });
+        return values;
+      };
+      const sqlPostDetailTransaction = `INSERT INTO detailtransactions (transactionId,productName,productPrice,productColor,productSize,quantity,productImage) values${mappingCarts()};`;
 
-    const [result] = await connection.query(sqlPostDetailTransaction);
-    connection.release();
+      const [result] = await connection.query(sqlPostDetailTransaction);
+      connection.release();
 
-    res.status(200).send({ message: "detail transaction succesfuly added" });
-  } catch (error) {
-    console.log(error);
+      res.status(200).send({ message: "detail transaction succesfuly added" });
+    } catch (error) {
+      next(error);
+    }
   }
-});
+);
 const postPaymentEvidence = router.post(
   "/evidence/payment",
   auth,
   multerUploadPaymentEvidence,
-  async (req, res) => {
+  async (req, res, next) => {
     try {
       const connection = await pool.promise().getConnection();
 
@@ -148,7 +153,7 @@ const postPaymentEvidence = router.post(
 
       res.status(200).send({ message: "Data telah berhasil di tambahkan" });
     } catch (error) {
-      console.log(error);
+      next(error);
     }
   }
 );

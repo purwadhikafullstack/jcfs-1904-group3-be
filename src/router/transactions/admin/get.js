@@ -8,7 +8,7 @@ const {
 
 const getTransactionTotalRevenue = router.get(
   "/total-revenue",
-  async (req, res) => {
+  async (req, res, next) => {
     try {
       const connection = await pool.promise().getConnection();
       const { year, method } = req.query;
@@ -27,14 +27,14 @@ const getTransactionTotalRevenue = router.get(
 
       res.status(200).send({ result });
     } catch (error) {
-      console.log(error);
+      next(error);
     }
   }
 );
 
 const getProductTotalRevenue = router.get(
   "/product/total-revenue",
-  async (req, res) => {
+  async (req, res, next) => {
     try {
       const connection = await pool.promise().getConnection();
       const { productName, sortMethod, sortMethodValue } = req.query;
@@ -61,14 +61,14 @@ const getProductTotalRevenue = router.get(
       connection.release;
       res.status(200).send({ result, productId });
     } catch (error) {
-      console.log(error);
+      next(error);
     }
   }
 );
 
 const getAllTransactionByStatus = router.get(
   "/admin/status",
-  async (req, res) => {
+  async (req, res, next) => {
     try {
       const { status, limit, offset } = req.query;
       const limitNumber = parseInt(limit);
@@ -131,7 +131,7 @@ const getAllTransactionByStatus = router.get(
         });
       }
     } catch (error) {
-      console.log(error);
+      next(error);
     }
   }
 );

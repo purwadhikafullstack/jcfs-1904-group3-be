@@ -3,39 +3,42 @@ const router = express.Router();
 const pool = require("../../config/database");
 const auth = require("../../middleware/auth");
 
-const getProducts = router.get("/", async (req, res) => {
+const getProducts = router.get("/", async (req, res, next) => {
   try {
     const connection = await pool.promise().getConnection();
-    const sqlGetProducts = `select id as productId, productName from products;`;
+    const sqlGetProducts = `select id as productId, productName from products where isDelete = 0;`;
 
     const [result] = await connection.query(sqlGetProducts);
     connection.release();
 
     res.status(200).send({ result });
   } catch (error) {
-    console.log(error);
+    next(error);
   }
 });
 
-const getCartsProductVariant = router.get("/cart", auth, async (req, res) => {
-  try {
-    const connection = await pool.promise().getConnection();
-    const { result } = req.query;
+const getCartsProductVariant = router.get(
+  "/cart",
+  auth,
+  async (req, res, next) => {
+    try {
+      const connection = await pool.promise().getConnection();
+      const { result } = req.query;
 
-    // converting carts query to object
-    var carts = result.map((value) => {
-      return JSON.parse(value);
-    });
+      // converting carts query to object
+      var carts = result.map((value) => {
+        return JSON.parse(value);
+      });
 
-    // data to input in where clause query
-    const productId = [];
-    const variantId = [];
-    carts.filter((value) => {
-      productId.push(value.productId);
-      variantId.push(value.variantId);
-    });
+      // data to input in where clause query
+      const productId = [];
+      const variantId = [];
+      carts.filter((value) => {
+        productId.push(value.productId);
+        variantId.push(value.variantId);
+      });
 
-    const sqlGetProducts = `SELECT p.id AS productId,
+      const sqlGetProducts = `SELECT p.id AS productId,
     p.productName,
     v.warehouseId,
     v.id As variantId,
@@ -46,54 +49,55 @@ const getCartsProductVariant = router.get("/cart", auth, async (req, res) => {
     v.qtyAvailable,
     v.qtyTotal FROM products as p
     JOIN variant as v ON v.productId = p.id
-    where  p.id in(?) and v.id in(?)`;
+    where  p.id in(?) and v.id in(?) and  p.isDelete = 0`;
 
-    const data = [productId, variantId];
+      const data = [productId, variantId];
 
-    const [products] = await connection.query(sqlGetProducts, data);
+      const [products] = await connection.query(sqlGetProducts, data);
 
-    // filtering product and variant
-    // checking which product and variant have the same product id and variant id to the carts
-    // if the id is the same it will add the variant and the product to cart
-    products.filter((products) => {
-      const {
-        productName,
-        warehouseId,
-        variant,
-        size,
-        price,
-        image,
-        qtyAvailable,
-        qtyTotal,
-      } = products;
+      // filtering product and variant
+      // checking which product and variant have the same product id and variant id to the carts
+      // if the id is the same it will add the variant and the product to cart
+      products.filter((products) => {
+        const {
+          productName,
+          warehouseId,
+          variant,
+          size,
+          price,
+          image,
+          qtyAvailable,
+          qtyTotal,
+        } = products;
 
-      carts.filter((value, index) => {
-        if (value.productId === products.productId) {
-          if (value.variantId === products.variantId) {
-            carts[index] = {
-              ...carts[index],
-              productName,
-              warehouseId,
-              variant,
-              size,
-              price,
-              image,
-              qtyAvailable,
-              qtyTotal,
-              total: value.productQuantity * products.price,
-            };
+        carts.filter((value, index) => {
+          if (value.productId === products.productId) {
+            if (value.variantId === products.variantId) {
+              carts[index] = {
+                ...carts[index],
+                productName,
+                warehouseId,
+                variant,
+                size,
+                price,
+                image,
+                qtyAvailable,
+                qtyTotal,
+                total: value.productQuantity * products.price,
+              };
+            }
           }
-        }
+        });
       });
-    });
 
-    connection.release();
+      connection.release();
 
-    res.status(200).send({ carts });
-  } catch (error) {
-    console.log(error);
+      res.status(200).send({ carts });
+    } catch (error) {
+      next(error);
+    }
   }
-});
+);
 
 const getProductsByCategory = async (keyWord, limit, offset, order, sortBy) => {
   try {
@@ -103,7 +107,7 @@ const getProductsByCategory = async (keyWord, limit, offset, order, sortBy) => {
     Where p.id IN(SELECT distinct p.id FROM products as p
     JOIN categories_products as c_p ON c_p.productId = p.id 
     JOIN categories as c ON c.id = c_p.categoryId 
-    WHERE c.categoryName LIKE ?
+    WHERE c.categoryName LIKE ? and  p.isDelete = 0
     ORDER by p.id);`;
     var getProductsByCategory = `SELECT p.id AS productId,
     p.productName,
@@ -119,7 +123,7 @@ const getProductsByCategory = async (keyWord, limit, offset, order, sortBy) => {
     Where p.id IN(SELECT distinct p.id FROM products as p
     JOIN categories_products as c_p ON c_p.productId = p.id 
     JOIN categories as c ON c.id = c_p.categoryId 
-    WHERE c.categoryName LIKE ?
+    WHERE c.categoryName LIKE ? and  p.isDelete = 0
     ORDER by p.id)
     GROUP BY p.id `;
     if (sortBy && order) {
@@ -137,7 +141,7 @@ const getProductsByCategory = async (keyWord, limit, offset, order, sortBy) => {
   }
 };
 
-const getFilteredProduct = router.get("/filtered", async (req, res) => {
+const getFilteredProduct = router.get("/filtered", async (req, res, next) => {
   try {
     const connection = await pool.promise().getConnection();
 
@@ -168,7 +172,7 @@ const getFilteredProduct = router.get("/filtered", async (req, res) => {
       if (!result.length) {
         const sqlGetTotalData = `SELECT count( distinct p.id) as total FROM products as p
         JOIN variant as v ON v.productId = p.id
-        Where p.productName Like  ? or v.color Like ? or v.size Like ?;`;
+        Where  p.isDelete = 0 and p.productName Like  ? or v.color Like ? or v.size Like ?;`;
         var getProductByKeyword = ` SELECT p.id AS productId,
         p.productName,
         v.warehouseId,
@@ -180,7 +184,7 @@ const getFilteredProduct = router.get("/filtered", async (req, res) => {
         v.qtyAvailable,
         v.qtyTotal FROM products as p
         JOIN variant as v ON v.productId = p.id
-        Where p.productName Like ? or v.color Like ? or v.size Like ?
+        where p.isDelete = 0 and p.productName Like ? or v.color Like ? or v.size Like ?
         GROUP BY p.id `;
 
         if (sortBy && order) {
@@ -219,7 +223,7 @@ const getFilteredProduct = router.get("/filtered", async (req, res) => {
       res.status(200).send({ result, dataCount });
     } else {
       const sqlGetTotalData = `SELECT count(distinct p.id) as total FROM products as p
-      JOIN variant as v ON v.productId = p.id;`;
+      JOIN variant as v ON v.productId = p.id  where isDelete = 0;`;
       var sqlGetProductList = `SELECT p.id AS productId,
       p.productName,
       v.warehouseId,
@@ -230,7 +234,7 @@ const getFilteredProduct = router.get("/filtered", async (req, res) => {
       v.image,
       v.qtyAvailable,
       v.qtyTotal FROM products as p
-      JOIN variant as v ON v.productId = p.id
+      JOIN variant as v ON v.productId = p.id  where p.isDelete = 0
       GROUP BY p.id `;
       if (sortBy && order) {
         sqlGetProductList += `ORDER BY ${sortBy} ${order} LIMIT ${limit} OFFSET ${offset};`;
@@ -244,22 +248,24 @@ const getFilteredProduct = router.get("/filtered", async (req, res) => {
       res.status(200).send({ result, dataCount });
     }
   } catch (error) {
-    console.log(error);
+    next(error);
   }
 });
 
-const getVariantsProducts = router.get("/productDetail", async (req, res) => {
-  try {
-    const connection = await pool.promise().getConnection();
+const getVariantsProducts = router.get(
+  "/productDetail",
+  async (req, res, next) => {
+    try {
+      const connection = await pool.promise().getConnection();
 
-    if (req.query.page) {
-      const { page, itemsPerPage } = req.query;
-      const limit = parseInt(itemsPerPage);
-      const offset = parseInt((page - 1) * itemsPerPage);
-      const sqlGetTotalData = `SELECT count(*) as total FROM products as p
+      if (req.query.page) {
+        const { page, itemsPerPage } = req.query;
+        const limit = parseInt(itemsPerPage);
+        const offset = parseInt((page - 1) * itemsPerPage);
+        const sqlGetTotalData = `SELECT count(*) as total FROM products as p
       JOIN variant as v ON v.productId = p.id
       Where p.id = ?;`;
-      const sqlGetProductList = `SELECT p.id AS productId,
+        const sqlGetProductList = `SELECT p.id AS productId,
       p.productName,
       v.warehouseId,
       v.id As variantId,
@@ -273,18 +279,18 @@ const getVariantsProducts = router.get("/productDetail", async (req, res) => {
       Where p.id = ?
       LIMIT ? OFFSET ?;`;
 
-      const { id } = req.query;
-      const data = [id, limit, offset];
-      const [dataCount] = await connection.query(sqlGetTotalData, id);
-      const [result] = await connection.query(sqlGetProductList, data);
-      connection.release();
+        const { id } = req.query;
+        const data = [id, limit, offset];
+        const [dataCount] = await connection.query(sqlGetTotalData, id);
+        const [result] = await connection.query(sqlGetProductList, data);
+        connection.release();
 
-      res.status(200).send({ result, dataCount });
-    } else {
-      const { id } = req.query;
+        res.status(200).send({ result, dataCount });
+      } else {
+        const { id } = req.query;
 
-      const productId = id;
-      const sqlGetProductList = `SELECT p.id AS productId,
+        const productId = id;
+        const sqlGetProductList = `SELECT p.id AS productId,
       p.productName,
       v.warehouseId,
       v.id As variantId,
@@ -295,19 +301,20 @@ const getVariantsProducts = router.get("/productDetail", async (req, res) => {
       v.qtyAvailable,
       v.qtyTotal FROM products as p
       JOIN variant as v ON v.productId = p.id
-      Where p.id = ?;`;
+      Where p.id = ? ;`;
 
-      const [result] = await connection.query(sqlGetProductList, productId);
-      connection.release();
+        const [result] = await connection.query(sqlGetProductList, productId);
+        connection.release();
 
-      res.status(200).send({ result });
+        res.status(200).send({ result });
+      }
+    } catch (error) {
+      next(error);
     }
-  } catch (error) {
-    console.log(error);
   }
-});
+);
 
-const getProductsCategory = router.get("/category", async (req, res) => {
+const getProductsCategory = router.get("/category", async (req, res, next) => {
   try {
     const connection = await pool.promise().getConnection();
     const sqlGetProductCategory = ` SELECT p.id As productId , c.id As categoryId , c.categoryName FROM products as p
@@ -319,7 +326,7 @@ const getProductsCategory = router.get("/category", async (req, res) => {
 
     res.status(200).send({ result });
   } catch (error) {
-    console.log(error);
+    next(error);
   }
 });
 
