@@ -18,7 +18,7 @@ app.use(express.static("public"));
 app.use(express.json());
 
 app.get("/", (req, res) => {
-  res.status(200).send("API IS RUNNING");
+  res.status(200).send("API IS RUNNINGG");
 });
 
 app.use("/products", productsRouter);
@@ -39,5 +39,5 @@ app.use((error, req, res, next) => {
 
 app.listen(port, (err) => {
   if (err) return console.log({ err });
-  console.log(`Api is running at server ${port}`);
+  console.log(`3_Warehouse is running at ${port}`);
 });

@@ -13,6 +13,7 @@ const {
   postProductVariant,
   postProduct,
 } = require("./post");
+
 const { deleteProductCategoryRouter, deleteProduct } = require("./delete");
 const { putProductRouter } = require("./put");
 
@@ -28,6 +29,8 @@ router.use(postProduct);
 
 router.use(deleteProductCategoryRouter);
 router.use(deleteProduct);
+
+router.use(putProductRouter);
 
 router.use(putProductRouter);
 
