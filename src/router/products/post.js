@@ -1,29 +1,31 @@
 const express = require("express");
 const router = express.Router();
 const pool = require("../../config/database");
-const { uploadProducts } = require("../services/multer");
+const { uploadProducts } = require("../../services/multer");
 
 const uploadProductImage = uploadProducts.single("image");
 
-const postProduct = router.post("/", async (req, res) => {
+const postProduct = router.post("/", async (req, res, next) => {
   try {
     const connection = await pool.promise().getConnection();
-    const { productName } = req.body;
+    const { addedProductName } = req.body;
+
     const sqlPostProduct = `INSERT INTO products SET productName = ?`;
 
-    const [result] = await connection.query(sqlPostProduct, productName);
-    connection.release();
+    const [result] = await connection.query(sqlPostProduct, addedProductName);
 
     const sqlGetNewProduct = `SELECT id FROM products ORDER BY id DESC LIMIT 1`;
     const [getProduct] = await connection.query(sqlGetNewProduct);
 
+    connection.release();
+
     res.status(200).send(getProduct[0]);
   } catch (error) {
-    console.log(error);
+    next(error);
   }
 });
 
-const postProductCategory = router.post("/category", async (req, res) => {
+const postProductCategory = router.post("/category", async (req, res, next) => {
   try {
     const connection = await pool.promise().getConnection();
     const { productId, categoryId } = req.body;
@@ -35,15 +37,15 @@ const postProductCategory = router.post("/category", async (req, res) => {
 
     res.status(200).send({ message: "Data telah berhasil di tambahkan" });
   } catch (error) {
-    console.log(error);
+    next(error);
   }
 });
 
-const postProductVariant = router.post("/variant", async (req, res) => {
+const postProductVariant = router.post("/variant", async (req, res, next) => {
   try {
     const connection = await pool.promise().getConnection();
 
-    const { quantity, productId, color, price, warehouseId } = req.body;
+    const { quantity, productId, color, price, warehouseId, size } = req.body;
 
     if (!req.body.size) {
       delete req.body.size;
@@ -57,9 +59,24 @@ const postProductVariant = router.post("/variant", async (req, res) => {
     const qtyTotal = quantity;
     const qtyAvailable = quantity;
 
-    const sqlPostProductVariant = `INSERT INTO variant
+    var sqlPostProductVariant = `INSERT INTO variant
     (color, price, warehouseId, qtyTotal, qtyAvailable, productId) values(?,?,?,?,?,?);`;
-    const data = [color, price, warehouseId, qtyTotal, qtyAvailable, productId];
+
+    var data = [color, price, warehouseId, qtyTotal, qtyAvailable, productId];
+
+    if (req.body.size) {
+      sqlPostProductVariant = `INSERT INTO variant
+    (color, price, warehouseId, qtyTotal, qtyAvailable, productId,size) values(?,?,?,?,?,?,?);`;
+      var data = [
+        color,
+        price,
+        warehouseId,
+        qtyTotal,
+        qtyAvailable,
+        productId,
+        size,
+      ];
+    }
 
     const [resultPost] = await connection.query(sqlPostProductVariant, data);
 
@@ -71,14 +88,14 @@ const postProductVariant = router.post("/variant", async (req, res) => {
       .status(200)
       .send({ message: "Data telah berhasil di tambahkan", resultGet });
   } catch (error) {
-    console.log(error);
+    next(error);
   }
 });
 
 const postVariantImage = router.post(
   "/variant/image",
   uploadProductImage,
-  async (req, res) => {
+  async (req, res, next) => {
     try {
       const connection = await pool.promise().getConnection();
 
@@ -95,7 +112,7 @@ const postVariantImage = router.post(
 
       res.status(200).send({ message: "Data telah berhasil di tambahkan" });
     } catch (error) {
-      console.log(error);
+      next(error);
     }
   }
 );
