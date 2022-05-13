@@ -18,7 +18,7 @@ app.use(express.static("public"));
 app.use(express.json());
 
 app.get("/", (req, res) => {
-  res.status(200).send("API IS RUNNINGG");
+  res.status(200).send("API 3 IS RUNNING 🚀");
 });
 
 app.use("/products", productsRouter);
