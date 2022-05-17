@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const pool = require("../../config/database");
 const { uploadProducts } = require("../../services/multer");
+require("dotenv").config();
 
 const uploadProductImage = uploadProducts.single("image");
 
@@ -100,7 +101,7 @@ const postVariantImage = router.post(
       const connection = await pool.promise().getConnection();
 
       const { id } = req.body;
-      const image = `http://localhost:2023/images/products/${req.file.filename}`;
+      const image = `${process.env.API_URL}/images/products/${req.file.filename}`;
 
       const sqlPutUserPhoto = `UPDATE variant SET ? WHERE id = ?`;
       const dataPutUserPhoto = [{ image: image }, id];

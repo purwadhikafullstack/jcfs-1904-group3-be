@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const pool = require("../../config/database");
 const auth = require("../../middleware/auth");
+require("dotenv").config();
 
 const { uploadPaymentEvidence } = require("../../services/multer");
 
@@ -138,7 +139,7 @@ const postPaymentEvidence = router.post(
       const connection = await pool.promise().getConnection();
 
       const { transactionId } = req.body;
-      const image = `http://localhost:2023/images/payment/${req.file.filename}`;
+      const image = `${process.env.API_URL}/images/payment/${req.file.filename}`;
 
       const sqlPutUserPhoto = `UPDATE transactions SET ? WHERE id = ?`;
       const dataPutUserPhoto = [
