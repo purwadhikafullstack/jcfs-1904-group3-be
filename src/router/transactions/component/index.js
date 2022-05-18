@@ -1,9 +1,9 @@
 const router = require("express").Router();
 const pool = require("../../../config/database");
+const connection = await pool.promise().getConnection();
 
 const getTransactionsByStatus = async (userId, status, limit, offset) => {
   try {
-    const connection = await pool.promise().getConnection();
     if (userId) {
       var sqlGetTransactionByStatus = `select t.id as transactionId, userId,totalAmount,paymentEvidence,status,
         addressId,province,city,district,urban_village,postal_code,detail_address,t.created_at,
@@ -68,14 +68,13 @@ const getTransactionsByStatus = async (userId, status, limit, offset) => {
       };
     }
   } catch (error) {
+    connection.release();
     console.log(error);
   }
 };
 
 const getTransactionDetail = async (arrayListOfTransactionId) => {
   try {
-    const connection = await pool.promise().getConnection();
-
     const sqlGetDetailTransactions = `select id as detailTransactionId,transactionId, productName,productPrice,productColor,productSize,quantity,productImage from detailtransactions where transactionId IN(?);
       `;
     const dataGetDetailTransactions = [arrayListOfTransactionId];
@@ -88,14 +87,13 @@ const getTransactionDetail = async (arrayListOfTransactionId) => {
 
     return resultDetailTransactions;
   } catch (error) {
+    connection.release();
     console.log(error);
   }
 };
 
 const getUserDetail = async (arrayListOfUserId) => {
   try {
-    const connection = await pool.promise().getConnection();
-
     const sqlGetUserDetail = `select id as userId,username,email from users where id IN(?);`;
     const dataGetUserDetail = [arrayListOfUserId];
     const [resultUserDetail] = await connection.query(
@@ -107,6 +105,7 @@ const getUserDetail = async (arrayListOfUserId) => {
 
     return resultUserDetail;
   } catch (error) {
+    connection.release();
     console.log(error);
   }
 };

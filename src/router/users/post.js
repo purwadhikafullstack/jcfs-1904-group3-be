@@ -3,11 +3,10 @@ const router = express.Router();
 const pool = require("../../config/database");
 const bcrypt = require("bcryptjs");
 const { sign } = require("../../services/token");
+const connection = await pool.promise().getConnection();
 
 const postRegisterUser = router.post("/register", async (req, res, next) => {
   try {
-    const connection = await pool.promise().getConnection();
-
     const { username, email, password } = req.body;
 
     const hashedPassword = bcrypt.hashSync(password);
@@ -22,14 +21,13 @@ const postRegisterUser = router.post("/register", async (req, res, next) => {
 
     res.status(200).send({ message: "detail transaction succesfuly added" });
   } catch (error) {
+    connection.release();
     next(error);
   }
 });
 
 const postLoginRouter = router.post("/login", async (req, res, next) => {
   try {
-    const connection = await pool.promise().getConnection();
-
     const { username, password } = req.body;
 
     const sqlPostLoginRouter =
@@ -61,6 +59,7 @@ const postLoginRouter = router.post("/login", async (req, res, next) => {
 
     res.status(200).send({ message: "successfuly login", user, token });
   } catch (error) {
+    connection.release();
     next(error);
   }
 });

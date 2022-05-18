@@ -5,10 +5,10 @@ const { uploadProducts } = require("../../services/multer");
 require("dotenv").config();
 
 const uploadProductImage = uploadProducts.single("image");
+const connection = await pool.promise().getConnection();
 
 const postProduct = router.post("/", async (req, res, next) => {
   try {
-    const connection = await pool.promise().getConnection();
     const { addedProductName } = req.body;
 
     const sqlPostProduct = `INSERT INTO products SET productName = ?`;
@@ -22,13 +22,13 @@ const postProduct = router.post("/", async (req, res, next) => {
 
     res.status(200).send(getProduct[0]);
   } catch (error) {
+    connection.release();
     next(error);
   }
 });
 
 const postProductCategory = router.post("/category", async (req, res, next) => {
   try {
-    const connection = await pool.promise().getConnection();
     const { productId, categoryId } = req.body;
 
     const sqlPostProductCategory = `INSERT INTO categories_products (productId,categoryId) values(?,?);`;
@@ -38,14 +38,13 @@ const postProductCategory = router.post("/category", async (req, res, next) => {
 
     res.status(200).send({ message: "Data telah berhasil di tambahkan" });
   } catch (error) {
+    connection.release();
     next(error);
   }
 });
 
 const postProductVariant = router.post("/variant", async (req, res, next) => {
   try {
-    const connection = await pool.promise().getConnection();
-
     const { quantity, productId, color, price, warehouseId, size } = req.body;
 
     if (!req.body.size) {
@@ -98,8 +97,6 @@ const postVariantImage = router.post(
   uploadProductImage,
   async (req, res, next) => {
     try {
-      const connection = await pool.promise().getConnection();
-
       const { id } = req.body;
       const image = `${process.env.API_URL}/images/products/${req.file.filename}`;
 

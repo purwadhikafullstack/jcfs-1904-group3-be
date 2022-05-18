@@ -1,10 +1,10 @@
 const router = require("express").Router();
 const pool = require("../../config/database");
 const auth = require("../../middleware/auth");
+const connection = await pool.promise().getConnection();
 
 const postCart = router.post("/", auth, async (req, res, next) => {
   try {
-    const connection = await pool.promise().getConnection();
     const { userId, productId, productQuantity, variantId } = req.body;
     // checking if there is a cart with the same product,variant,userid and isDelete Null
     const sqlCheckCart = `SELECT * from carts where productId = ? and userId = ? and variantId = ? and isDelete is NULL; `;
@@ -46,6 +46,7 @@ const postCart = router.post("/", auth, async (req, res, next) => {
       res.status(200).send(result);
     }
   } catch (error) {
+    connection.release();
     next(error);
   }
 });

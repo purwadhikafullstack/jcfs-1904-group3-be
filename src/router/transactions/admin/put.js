@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const pool = require("../../../config/database");
+const connection = await pool.promise().getConnection();
 
 const putApproveWaitingPayment = router.put(
   "/approve/waiting-payment",
@@ -8,7 +9,6 @@ const putApproveWaitingPayment = router.put(
     try {
       const { transactionId } = req.body;
 
-      const connection = await pool.promise().getConnection();
       const sqlApprovePutWaitingPayment = `UPDATE transactions set status = "packaging" where id = ?;`;
 
       const [result] = await connection.query(
@@ -19,6 +19,7 @@ const putApproveWaitingPayment = router.put(
 
       res.status(200).send({ message: "Data telah berhasil di perbarui" });
     } catch (error) {
+      connection.release();
       next(error);
     }
   }
@@ -30,7 +31,6 @@ const putRejectWaitingPayment = router.put(
     try {
       const { transactionId } = req.body;
 
-      const connection = await pool.promise().getConnection();
       const sqlPutRejectPayment = `UPDATE transactions set status = "rejected" where id = ?;`;
 
       const [result] = await connection.query(
@@ -41,6 +41,7 @@ const putRejectWaitingPayment = router.put(
 
       res.status(200).send({ message: "Data telah berhasil di perbarui" });
     } catch (error) {
+      connection.release();
       next(error);
     }
   }
@@ -52,7 +53,6 @@ const putFinishPackagingPayment = router.put(
     try {
       const { transactionId, items } = req.body;
 
-      const connection = await pool.promise().getConnection();
       const sqlPutFinishPackagingPayment = `UPDATE transactions set status = "delivering" where id = ?;`;
 
       const [result] = await connection.query(
@@ -64,6 +64,7 @@ const putFinishPackagingPayment = router.put(
 
       res.status(200).send({ message: "Data telah berhasil di perbarui" });
     } catch (error) {
+      connection.release();
       next(error);
     }
   }

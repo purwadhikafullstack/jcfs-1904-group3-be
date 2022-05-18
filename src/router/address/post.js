@@ -1,10 +1,10 @@
 const router = require("express").Router();
 const pool = require("../../config/database");
 const auth = require("../../middleware/auth");
+const connection = await pool.promise().getConnection();
 
 const postAddress = router.post("/", auth, async (req, res, next) => {
   try {
-    const connection = await pool.promise().getConnection();
     const {
       province,
       city,
@@ -28,6 +28,7 @@ const postAddress = router.post("/", auth, async (req, res, next) => {
 
     res.status(200).send({ addressId: result.insertId });
   } catch (error) {
+    connection.release();
     next(error);
   }
 });

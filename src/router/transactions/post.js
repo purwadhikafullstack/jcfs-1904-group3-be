@@ -7,13 +7,13 @@ require("dotenv").config();
 const { uploadPaymentEvidence } = require("../../services/multer");
 
 const multerUploadPaymentEvidence = uploadPaymentEvidence.single("image");
+const connection = await pool.promise().getConnection();
 
 const postWaitingPaymentTransaction = router.post(
   "/waiting-payment",
   auth,
   async (req, res, next) => {
     try {
-      const connection = await pool.promise().getConnection();
       const { totalAmount, userId, addressId, carts } = req.body;
       const setRejectPayment = async (transactionId) => {
         const sqlPutRejectPayment = `UPDATE transactions set status = "rejected" where id = ? and status="waiting payment";`;
@@ -91,6 +91,7 @@ const postWaitingPaymentTransaction = router.post(
         });
       }
     } catch (error) {
+      connection.release();
       next(error);
     }
   }
@@ -101,7 +102,6 @@ const postDetailTransaction = router.post(
   auth,
   async (req, res, next) => {
     try {
-      const connection = await pool.promise().getConnection();
       const { carts, transactionId } = req.body;
 
       const mappingCarts = () => {
@@ -126,6 +126,7 @@ const postDetailTransaction = router.post(
 
       res.status(200).send({ message: "detail transaction succesfuly added" });
     } catch (error) {
+      connection.release();
       next(error);
     }
   }
@@ -136,8 +137,6 @@ const postPaymentEvidence = router.post(
   multerUploadPaymentEvidence,
   async (req, res, next) => {
     try {
-      const connection = await pool.promise().getConnection();
-
       const { transactionId } = req.body;
       const image = `${process.env.API_URL}/images/payment/${req.file.filename}`;
 

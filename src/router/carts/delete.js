@@ -3,12 +3,12 @@ const req = require("express/lib/request");
 const router = express.Router();
 const pool = require("../../config/database");
 const auth = require("../../middleware/auth");
+const connection = await pool.promise().getConnection();
 
 const deleteCarts = router.delete("/", auth, async (req, res, next) => {
   try {
     const { cartId } = req.body;
 
-    const connection = await pool.promise().getConnection();
     const sqlDeleteProduct = `update carts set isDelete = 1,productQuantity = 0 where id = ?`;
 
     const [result] = await connection.query(sqlDeleteProduct, cartId);
@@ -17,6 +17,7 @@ const deleteCarts = router.delete("/", auth, async (req, res, next) => {
 
     res.status(200).send({ message: "data berhasil di hapus" });
   } catch (error) {
+    connection.release();
     next(error);
   }
 });
@@ -28,8 +29,6 @@ const deleteCartWhenCheckout = router.delete(
       // delete cart when the item successfuly checkout
       // idCarts is an array of object consisting the cart that recently just got checkout
       const { idCarts } = req.body;
-
-      const connection = await pool.promise().getConnection();
 
       const sqlDeleteCartWhenCheckout = `update carts set isDelete = 1,productQuantity = 0 where id in(?)`;
       const dataDeleteCartWhenCheckout = [idCarts];
@@ -43,6 +42,7 @@ const deleteCartWhenCheckout = router.delete(
 
       res.status(200).send({ message: "data berhasil di hapus" });
     } catch (error) {
+      connection.release();
       next(error);
     }
   }

@@ -2,10 +2,10 @@ const express = require("express");
 const router = express.Router();
 const pool = require("../../config/database");
 const auth = require("../../middleware/auth");
+const connection = await pool.promise().getConnection();
 
 const getProducts = router.get("/", async (req, res, next) => {
   try {
-    const connection = await pool.promise().getConnection();
     const sqlGetProducts = `select id as productId, productName from products where isDelete = 0;`;
 
     const [result] = await connection.query(sqlGetProducts);
@@ -13,6 +13,7 @@ const getProducts = router.get("/", async (req, res, next) => {
 
     res.status(200).send({ result });
   } catch (error) {
+    connection.release();
     next(error);
   }
 });
@@ -22,7 +23,6 @@ const getCartsProductVariant = router.get(
   auth,
   async (req, res, next) => {
     try {
-      const connection = await pool.promise().getConnection();
       const { result } = req.query;
 
       // converting carts query to object
@@ -94,6 +94,7 @@ const getCartsProductVariant = router.get(
 
       res.status(200).send({ carts });
     } catch (error) {
+      connection.release();
       next(error);
     }
   }
@@ -101,7 +102,6 @@ const getCartsProductVariant = router.get(
 
 const getProductsByCategory = async (keyWord, limit, offset, order, sortBy) => {
   try {
-    const connection = await pool.promise().getConnection();
     const sqlGetTotalData = `SELECT count(distinct p.id) as total FROM products as p
     JOIN variant as v ON v.productId = p.id
     Where p.id IN(SELECT distinct p.id FROM products as p
@@ -143,8 +143,6 @@ const getProductsByCategory = async (keyWord, limit, offset, order, sortBy) => {
 
 const getFilteredProduct = router.get("/filtered", async (req, res, next) => {
   try {
-    const connection = await pool.promise().getConnection();
-
     const { page, itemsPerPage, order, sortBy } = req.query;
     const limit = parseInt(itemsPerPage);
     const offset = parseInt((page - 1) * itemsPerPage);
@@ -248,6 +246,7 @@ const getFilteredProduct = router.get("/filtered", async (req, res, next) => {
       res.status(200).send({ result, dataCount });
     }
   } catch (error) {
+    connection.release();
     next(error);
   }
 });
@@ -256,8 +255,6 @@ const getVariantsProducts = router.get(
   "/productDetail",
   async (req, res, next) => {
     try {
-      const connection = await pool.promise().getConnection();
-
       if (req.query.page) {
         const { page, itemsPerPage } = req.query;
         const limit = parseInt(itemsPerPage);
@@ -309,6 +306,7 @@ const getVariantsProducts = router.get(
         res.status(200).send({ result });
       }
     } catch (error) {
+      connection.release();
       next(error);
     }
   }
@@ -316,7 +314,6 @@ const getVariantsProducts = router.get(
 
 const getProductsCategory = router.get("/category", async (req, res, next) => {
   try {
-    const connection = await pool.promise().getConnection();
     const sqlGetProductCategory = ` SELECT p.id As productId , c.id As categoryId , c.categoryName FROM products as p
     JOIN categories_products as c_p ON c_p.productId = p.id 
     JOIN categories as c ON c.id = c_p.categoryId WHERE p.id = ?;`;
@@ -326,6 +323,7 @@ const getProductsCategory = router.get("/category", async (req, res, next) => {
 
     res.status(200).send({ result });
   } catch (error) {
+    connection.release();
     next(error);
   }
 });

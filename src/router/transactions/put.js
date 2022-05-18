@@ -3,6 +3,7 @@ const router = express.Router();
 const pool = require("../../config/database");
 
 const auth = require("../../middleware/auth");
+const connection = await pool.promise().getConnection();
 
 const putFinishDeliveringPayment = router.put(
   "/finish/delivering",
@@ -11,7 +12,6 @@ const putFinishDeliveringPayment = router.put(
     try {
       const { transactionId, items } = req.body;
 
-      const connection = await pool.promise().getConnection();
       const sqlFinishDeliveringPayment = `UPDATE transactions set status = "completed" where id = ?;`;
 
       const [result] = await connection.query(
@@ -38,6 +38,7 @@ const putFinishDeliveringPayment = router.put(
 
       res.status(200).send({ message: "Data telah berhasil di perbarui" });
     } catch (error) {
+      connection.release();
       next(error);
     }
   }

@@ -5,12 +5,12 @@ const {
   getTransactionDetail,
   getUserDetail,
 } = require("../component");
+const connection = await pool.promise().getConnection();
 
 const getTransactionTotalRevenue = router.get(
   "/total-revenue",
   async (req, res, next) => {
     try {
-      const connection = await pool.promise().getConnection();
       const { year, method } = req.query;
       const addedMethodQuery = ` ${method}(created_at);`;
       var sqlgetTransactionTotalRevenue = `select created_at as Date , sum(totalAmount) as totalAmount from transactions 
@@ -27,6 +27,7 @@ const getTransactionTotalRevenue = router.get(
 
       res.status(200).send({ result });
     } catch (error) {
+      connection.release();
       next(error);
     }
   }
@@ -36,7 +37,6 @@ const getProductTotalRevenue = router.get(
   "/product/total-revenue",
   async (req, res, next) => {
     try {
-      const connection = await pool.promise().getConnection();
       const { productName, sortMethod, sortMethodValue } = req.query;
       const method = sortMethod;
       const value = parseInt(sortMethodValue);
@@ -58,9 +58,10 @@ const getProductTotalRevenue = router.get(
       const getProductId = `select id from products where productName like ?`;
       const [productId] = await connection.query(getProductId, productName);
       console.log(productId);
-      connection.release;
+      connection.release();
       res.status(200).send({ result, productId });
     } catch (error) {
+      connection.release();
       next(error);
     }
   }
