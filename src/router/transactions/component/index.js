@@ -1,8 +1,8 @@
 const router = require("express").Router();
 const pool = require("../../../config/database");
-const connection = await pool.promise().getConnection();
 
 const getTransactionsByStatus = async (userId, status, limit, offset) => {
+  const connection = await pool.promise().getConnection();
   try {
     if (userId) {
       var sqlGetTransactionByStatus = `select t.id as transactionId, userId,totalAmount,paymentEvidence,status,
@@ -74,6 +74,7 @@ const getTransactionsByStatus = async (userId, status, limit, offset) => {
 };
 
 const getTransactionDetail = async (arrayListOfTransactionId) => {
+  const connection = await pool.promise().getConnection();
   try {
     const sqlGetDetailTransactions = `select id as detailTransactionId,transactionId, productName,productPrice,productColor,productSize,quantity,productImage from detailtransactions where transactionId IN(?);
       `;
@@ -93,6 +94,7 @@ const getTransactionDetail = async (arrayListOfTransactionId) => {
 };
 
 const getUserDetail = async (arrayListOfUserId) => {
+  const connection = await pool.promise().getConnection();
   try {
     const sqlGetUserDetail = `select id as userId,username,email from users where id IN(?);`;
     const dataGetUserDetail = [arrayListOfUserId];

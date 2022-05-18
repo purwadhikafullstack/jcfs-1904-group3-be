@@ -1,8 +1,8 @@
 const pool = require("../../config/database");
 const { verify } = require("../../services/token");
-const connection = await pool.promise().getConnection();
 
 const auth = async (req, res, next) => {
+  const connection = await pool.promise().getConnection();
   try {
     const token = req.headers.authorization.replace("Bearer ", "");
     const verifiedToken = verify(token);

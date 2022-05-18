@@ -2,9 +2,9 @@ const express = require("express");
 const router = express.Router();
 const pool = require("../../config/database");
 const auth = require("../../middleware/auth");
-const connection = await pool.promise().getConnection();
 
 const getProducts = router.get("/", async (req, res, next) => {
+  const connection = await pool.promise().getConnection();
   try {
     const sqlGetProducts = `select id as productId, productName from products where isDelete = 0;`;
 
@@ -22,6 +22,7 @@ const getCartsProductVariant = router.get(
   "/cart",
   auth,
   async (req, res, next) => {
+    const connection = await pool.promise().getConnection();
     try {
       const { result } = req.query;
 
@@ -101,6 +102,7 @@ const getCartsProductVariant = router.get(
 );
 
 const getProductsByCategory = async (keyWord, limit, offset, order, sortBy) => {
+  const connection = await pool.promise().getConnection();
   try {
     const sqlGetTotalData = `SELECT count(distinct p.id) as total FROM products as p
     JOIN variant as v ON v.productId = p.id
@@ -142,6 +144,7 @@ const getProductsByCategory = async (keyWord, limit, offset, order, sortBy) => {
 };
 
 const getFilteredProduct = router.get("/filtered", async (req, res, next) => {
+  const connection = await pool.promise().getConnection();
   try {
     const { page, itemsPerPage, order, sortBy } = req.query;
     const limit = parseInt(itemsPerPage);
@@ -254,6 +257,7 @@ const getFilteredProduct = router.get("/filtered", async (req, res, next) => {
 const getVariantsProducts = router.get(
   "/productDetail",
   async (req, res, next) => {
+    const connection = await pool.promise().getConnection();
     try {
       if (req.query.page) {
         const { page, itemsPerPage } = req.query;
@@ -313,6 +317,7 @@ const getVariantsProducts = router.get(
 );
 
 const getProductsCategory = router.get("/category", async (req, res, next) => {
+  const connection = await pool.promise().getConnection();
   try {
     const sqlGetProductCategory = ` SELECT p.id As productId , c.id As categoryId , c.categoryName FROM products as p
     JOIN categories_products as c_p ON c_p.productId = p.id 

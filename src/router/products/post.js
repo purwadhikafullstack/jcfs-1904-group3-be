@@ -5,9 +5,9 @@ const { uploadProducts } = require("../../services/multer");
 require("dotenv").config();
 
 const uploadProductImage = uploadProducts.single("image");
-const connection = await pool.promise().getConnection();
 
 const postProduct = router.post("/", async (req, res, next) => {
+  const connection = await pool.promise().getConnection();
   try {
     const { addedProductName } = req.body;
 
@@ -28,6 +28,7 @@ const postProduct = router.post("/", async (req, res, next) => {
 });
 
 const postProductCategory = router.post("/category", async (req, res, next) => {
+  const connection = await pool.promise().getConnection();
   try {
     const { productId, categoryId } = req.body;
 
@@ -44,6 +45,7 @@ const postProductCategory = router.post("/category", async (req, res, next) => {
 });
 
 const postProductVariant = router.post("/variant", async (req, res, next) => {
+  const connection = await pool.promise().getConnection();
   try {
     const { quantity, productId, color, price, warehouseId, size } = req.body;
 
@@ -96,6 +98,7 @@ const postVariantImage = router.post(
   "/variant/image",
   uploadProductImage,
   async (req, res, next) => {
+    const connection = await pool.promise().getConnection();
     try {
       const { id } = req.body;
       const image = `${process.env.API_URL}/images/products/${req.file.filename}`;

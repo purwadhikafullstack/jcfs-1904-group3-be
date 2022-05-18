@@ -1,9 +1,9 @@
 const express = require("express");
 const router = express.Router();
 const pool = require("../../config/database");
-const connection = await pool.promise().getConnection();
 
 const putProductRouter = router.put("/", async (req, res, next) => {
+  const connection = await pool.promise().getConnection();
   try {
     const { productData, productId, variantId } = req.body;
     const { productName, color, price, qtyTotal, qtyAvailable } = productData;

@@ -1,9 +1,9 @@
 const router = require("express").Router();
 const pool = require("../../config/database");
 const auth = require("../../middleware/auth");
-const connection = await pool.promise().getConnection();
 
 const postCart = router.post("/", auth, async (req, res, next) => {
+  const connection = await pool.promise().getConnection();
   try {
     const { userId, productId, productQuantity, variantId } = req.body;
     // checking if there is a cart with the same product,variant,userid and isDelete Null

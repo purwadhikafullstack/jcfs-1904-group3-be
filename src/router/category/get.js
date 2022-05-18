@@ -1,9 +1,9 @@
 const express = require("express");
 const router = express.Router();
 const pool = require("../../config/database");
-const connection = await pool.promise().getConnection();
 
 const getCategory = router.get("/", async (req, res, next) => {
+  const connection = await pool.promise().getConnection();
   try {
     const sqlGetProductCategory = ` SELECT id,categoryName from categories;`;
 

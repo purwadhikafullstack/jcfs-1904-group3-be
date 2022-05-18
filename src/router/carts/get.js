@@ -1,9 +1,9 @@
 const router = require("express").Router();
 const pool = require("../../config/database");
 const auth = require("../../middleware/auth");
-const connection = await pool.promise().getConnection();
 
 const getCarts = router.get("/", auth, async (req, res, next) => {
+  const connection = await pool.promise().getConnection();
   try {
     const { userId } = req.query;
     const sqlpostCart = `SELECT  id as cartId,userId,productId,variantId,productQuantity FROM carts where userId = ? and isDelete is NULL;`;

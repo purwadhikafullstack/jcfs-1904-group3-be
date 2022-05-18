@@ -1,11 +1,11 @@
 const express = require("express");
 const router = express.Router();
 const pool = require("../../../config/database");
-const connection = await pool.promise().getConnection();
 
 const putApproveWaitingPayment = router.put(
   "/approve/waiting-payment",
   async (req, res, next) => {
+    const connection = await pool.promise().getConnection();
     try {
       const { transactionId } = req.body;
 
@@ -28,6 +28,7 @@ const putApproveWaitingPayment = router.put(
 const putRejectWaitingPayment = router.put(
   "/reject/waiting-payment",
   async (req, res, next) => {
+    const connection = await pool.promise().getConnection();
     try {
       const { transactionId } = req.body;
 
@@ -50,6 +51,7 @@ const putRejectWaitingPayment = router.put(
 const putFinishPackagingPayment = router.put(
   "/finish/packaging",
   async (req, res, next) => {
+    const connection = await pool.promise().getConnection();
     try {
       const { transactionId, items } = req.body;
 

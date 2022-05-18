@@ -2,9 +2,9 @@ const express = require("express");
 const router = express.Router();
 const pool = require("../../config/database");
 const auth = require("../../middleware/auth");
-const connection = await pool.promise().getConnection();
 
 const putCartQuantity = router.put("/", auth, async (req, res, next) => {
+  const connection = await pool.promise().getConnection();
   try {
     const { cartId, productQuantity } = req.body;
     const sqlPutCartQuantity = `UPDATE carts 

@@ -1,9 +1,9 @@
 const router = require("express").Router();
 const pool = require("../../config/database");
 const auth = require("../../middleware/auth");
-const connection = await pool.promise().getConnection();
 
 const postAddress = router.post("/", auth, async (req, res, next) => {
+  const connection = await pool.promise().getConnection();
   try {
     const {
       province,

@@ -2,9 +2,9 @@ const express = require("express");
 const req = require("express/lib/request");
 const router = express.Router();
 const pool = require("../../config/database");
-const connection = await pool.promise().getConnection();
 
 const deleteProduct = router.delete("/", async (req, res, next) => {
+  const connection = await pool.promise().getConnection();
   try {
     const { productId } = req.body;
 
@@ -24,6 +24,7 @@ const deleteProduct = router.delete("/", async (req, res, next) => {
 const deleteProductCategoryRouter = router.delete(
   "/category",
   async (req, res, next) => {
+    const connection = await pool.promise().getConnection();
     try {
       const { productId, categoryId } = req.body;
 

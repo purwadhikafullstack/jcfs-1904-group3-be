@@ -7,12 +7,12 @@ require("dotenv").config();
 const { uploadPaymentEvidence } = require("../../services/multer");
 
 const multerUploadPaymentEvidence = uploadPaymentEvidence.single("image");
-const connection = await pool.promise().getConnection();
 
 const postWaitingPaymentTransaction = router.post(
   "/waiting-payment",
   auth,
   async (req, res, next) => {
+    const connection = await pool.promise().getConnection();
     try {
       const { totalAmount, userId, addressId, carts } = req.body;
       const setRejectPayment = async (transactionId) => {
@@ -101,6 +101,7 @@ const postDetailTransaction = router.post(
   "/detail",
   auth,
   async (req, res, next) => {
+    const connection = await pool.promise().getConnection();
     try {
       const { carts, transactionId } = req.body;
 
@@ -136,6 +137,7 @@ const postPaymentEvidence = router.post(
   auth,
   multerUploadPaymentEvidence,
   async (req, res, next) => {
+    const connection = await pool.promise().getConnection();
     try {
       const { transactionId } = req.body;
       const image = `${process.env.API_URL}/images/payment/${req.file.filename}`;

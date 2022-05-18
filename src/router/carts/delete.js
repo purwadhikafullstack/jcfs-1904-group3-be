@@ -3,9 +3,9 @@ const req = require("express/lib/request");
 const router = express.Router();
 const pool = require("../../config/database");
 const auth = require("../../middleware/auth");
-const connection = await pool.promise().getConnection();
 
 const deleteCarts = router.delete("/", auth, async (req, res, next) => {
+  const connection = await pool.promise().getConnection();
   try {
     const { cartId } = req.body;
 
@@ -25,6 +25,7 @@ const deleteCarts = router.delete("/", auth, async (req, res, next) => {
 const deleteCartWhenCheckout = router.delete(
   "/checkout",
   async (req, res, next) => {
+    const connection = await pool.promise().getConnection();
     try {
       // delete cart when the item successfuly checkout
       // idCarts is an array of object consisting the cart that recently just got checkout

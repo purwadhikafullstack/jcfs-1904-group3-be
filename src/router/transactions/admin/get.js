@@ -5,11 +5,11 @@ const {
   getTransactionDetail,
   getUserDetail,
 } = require("../component");
-const connection = await pool.promise().getConnection();
 
 const getTransactionTotalRevenue = router.get(
   "/total-revenue",
   async (req, res, next) => {
+    const connection = await pool.promise().getConnection();
     try {
       const { year, method } = req.query;
       const addedMethodQuery = ` ${method}(created_at);`;
@@ -36,6 +36,7 @@ const getTransactionTotalRevenue = router.get(
 const getProductTotalRevenue = router.get(
   "/product/total-revenue",
   async (req, res, next) => {
+    const connection = await pool.promise().getConnection();
     try {
       const { productName, sortMethod, sortMethodValue } = req.query;
       const method = sortMethod;
@@ -70,6 +71,7 @@ const getProductTotalRevenue = router.get(
 const getAllTransactionByStatus = router.get(
   "/admin/status",
   async (req, res, next) => {
+    const connection = await pool.promise().getConnection();
     try {
       const { status, limit, offset } = req.query;
       const limitNumber = parseInt(limit);

@@ -3,9 +3,9 @@ const router = express.Router();
 const pool = require("../../config/database");
 const bcrypt = require("bcryptjs");
 const { sign } = require("../../services/token");
-const connection = await pool.promise().getConnection();
 
 const postRegisterUser = router.post("/register", async (req, res, next) => {
+  const connection = await pool.promise().getConnection();
   try {
     const { username, email, password } = req.body;
 
@@ -27,6 +27,7 @@ const postRegisterUser = router.post("/register", async (req, res, next) => {
 });
 
 const postLoginRouter = router.post("/login", async (req, res, next) => {
+  const connection = await pool.promise().getConnection();
   try {
     const { username, password } = req.body;
 

@@ -3,12 +3,12 @@ const router = express.Router();
 const pool = require("../../config/database");
 
 const auth = require("../../middleware/auth");
-const connection = await pool.promise().getConnection();
 
 const putFinishDeliveringPayment = router.put(
   "/finish/delivering",
   auth,
   async (req, res, next) => {
+    const connection = await pool.promise().getConnection();
     try {
       const { transactionId, items } = req.body;
 
